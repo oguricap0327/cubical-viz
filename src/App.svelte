@@ -1,13 +1,19 @@
 <script lang="ts">
-  import Interval from './lib/Interval.svelte';
+  import Scene from './lib/Scene.svelte';
+  import Controls from './lib/Controls.svelte';
+  import { type VisualizationType, VISUALIZATIONS } from './lib/types';
+
+  let current: VisualizationType = $state('interval');
 </script>
 
 <main>
   <div class="header">
     <h1>Cubical Type Theory Visualizer</h1>
-    <p>The interval <strong>I</strong> — a path from i0 to i1</p>
+    <p>{VISUALIZATIONS[current].description}</p>
   </div>
-  <Interval />
+
+  <Controls selected={current} onSelect={(v) => (current = v)} />
+  <Scene visualization={current} />
 </main>
 
 <style>
@@ -25,6 +31,7 @@
     z-index: 10;
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    max-width: 500px;
   }
 
   h1 {

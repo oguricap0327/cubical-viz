@@ -1,0 +1,134 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  import type { VisualizationType } from './types';
+  import { createInterval } from './createInterval';
+  import { createPath } from './createPath';
+  import { createSquare } from './createSquare';
+  import { createCube } from './createCube';
+  import { createComposition } from './createComposition';
+  import { createTransport } from './createTransport';
+
+  let { visualization }: { visualization: VisualizationType } = $props();
+
+  let canvas: HTMLCanvasElement;
+  let scene: THREE.Scene;
+  let currentGroup: THREE.Group | undefined;
+  let currentAnimate: ((time: number) => void) | undefined;
+  let sceneReady = $state(false);
+
+  function loadVisualization(type: VisualizationType) {
+    if (currentGroup) {
+      scene.remove(currentGroup);
+      currentGroup = undefined;
+      currentAnimate = undefined;
+    }
+
+    let result: { group: THREE.Group; animate?: (time: number) => void };
+
+    switch (type) {
+      case 'interval':
+        result = { group: createInterval() };
+        break;
+      case 'path':
+        result = createPath();
+        break;
+      case 'square':
+        result = createSquare();
+        break;
+      case 'cube':
+        result = createCube();
+        break;
+      case 'composition':
+        result = createComposition();
+        break;
+      case 'transport':
+        result = createTransport();
+        break;
+    }
+
+    currentGroup = result.group;
+    currentAnimate = result.animate;
+    scene.add(currentGroup);
+  }
+
+  $effect(() => {
+    if (sceneReady) {
+      loadVisualization(visualization);
+    }
+  });
+
+  onMount(() => {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a2e);
+
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      100,
+    );
+    camera.position.set(0, 0.8, 3);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const pointLight = new THREE.PointLight(0xffffff, 1.2, 50);
+    pointLight.position.set(2, 3, 4);
+    scene.add(pointLight);
+
+    const gridHelper = new THREE.GridHelper(4, 20, 0x333355, 0x222244);
+    gridHelper.position.y = -0.5;
+    scene.add(gridHelper);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 1;
+    controls.maxDistance = 10;
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    sceneReady = true;
+
+    const clock = new THREE.Clock();
+    let animationId: number;
+
+    function animate() {
+      animationId = requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+      if (currentAnimate) currentAnimate(t);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', onResize);
+      controls.dispose();
+      renderer.dispose();
+    };
+  });
+</script>
+
+<canvas bind:this={canvas}></canvas>
+
+<style>
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>
