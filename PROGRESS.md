@@ -120,3 +120,37 @@ src/lib/
 **Ready for review and testing!** 🐎✨
 
 The foundation is solid and extensible. Adding new rules is now straightforward - just create a new RuleDefinition and corresponding Svelte component.
+
+## Update: Interactive Controls Added (2026-03-14 02:51 HKT)
+
+### New Features
+- ✅ **Slider Component** - Range slider with real-time value display
+- ✅ **PlayPause Component** - Toggle animation on/off
+- ✅ **Manual Control Mode** - Slider overrides automatic animation
+- ✅ **Integrated into CompositionRule and TransportRule**
+
+### How It Works
+- Play/Pause button controls animation state
+- Slider allows manual scrubbing through the visualization
+- When slider is used, animation pauses automatically
+- Pressing Play resumes automatic animation
+
+### Technical Implementation
+- Svelte 5 $bindable for two-way data binding
+- Snippet-based control injection (flexible architecture)
+- State management: `playing`, `timeValue`, `manualControl`
+- Clean separation: controls are optional, rules work without them
+
+### User Experience
+Users can now:
+1. Watch the automatic animation
+2. Pause and scrub manually with the slider
+3. Resume animation from any point
+4. Explore the visualization at their own pace
+
+This makes the visualizations much more pedagogical - students can pause and examine each step of the composition or transport operation.
+
+---
+
+**Total commits:** 11  
+**Status:** Phase 1 ✅ | Tier 1 Rules ✅ | Interactive Controls ✅
