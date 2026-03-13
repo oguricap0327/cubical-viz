@@ -1,0 +1,128 @@
+\documentclass[10pt,a4paper,utf8]{article}
+
+\usepackage[a4paper,inner=100pt,outer=100pt,textheight=630pt,centering]{geometry}
+
+\usepackage{enumerate}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[pagebackref,citecolor=blue,linkcolor=OliveGreen,urlcolor=Mahogany,colorlinks]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{url}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{cases}
+\usepackage[innertopmargin=-5,skipbelow=-5]{mdframed}
+\usepackage{stmaryrd}
+\usepackage{mathpartir}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usetikzlibrary{arrows,matrix,decorations.pathmorphing,
+  decorations.markings, calc, backgrounds}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem*{theorem*}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem*{lemma*}{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem*{corollary*}{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem*{proposition*}{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem*{definition*}{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem*{example*}{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem*{remark*}{Remark}
+
+\input{macro}
+
+\begin{document}
+
+\title{Cubical Type Theory: a constructive interpretation of the
+  univalence axiom\footnote{This material is based upon work supported
+    by the National Science Foundation under agreement
+    No. DMS-1128155. Any opinions, findings and conclusions or
+    recommendations expressed in this material are those of the
+    author(s) and do not necessarily reflect the views of the National
+    Science Foundation.}}
+
+\author{Cyril Cohen, Thierry Coquand, Simon Huber, and Anders Mörtberg}
+
+\date{}
+
+\maketitle
+
+\begin{abstract}
+  This paper presents a type theory in which it is possible to
+  directly manipulate $n$-dimensional cubes (points, lines, squares,
+  cubes, etc.) based on an interpretation of dependent type theory in
+  a cubical set model. This enables new ways to reason about identity
+  types, for instance, function extensionality is directly provable in
+  the system. Further, Voevodsky's univalence axiom is provable in
+  this system. We also explain an extension with some higher inductive
+  types like the circle and propositional truncation. Finally we
+  provide semantics for this cubical type theory in a constructive
+  meta-theory.
+\end{abstract}
+
+\tableofcontents
+
+\input{cubicaltt}
+
+\subparagraph*{Acknowledgements}
+
+This work originates from discussions between the four authors around an implementation
+of a type system corresponding to the model described in~\cite{BCH}. This implementation
+indicated a problem with the representation of higher inductive types, e.g., the elimination rule
+for the circle, and suggested the need of extending this cubical model with a diagonal 
+operation. The general framework (uniformity condition, connections, semantics of spheres and propositional 
+truncation) is due to the second author. In particular, the glueing operation with its composition was 
+introduced as a generalization of the operation described in~\cite{BCH} transforming an equivalence
+into a path, and with the condition $A = \Glue~[]~A$. In a first attempt, we tried to force ``regularity'', 
+i.e., the equation $\transport~i~A~a_0 = a_0$ if $A$ is independent of $i$ (which seemed to be necessary
+in  order to get filling from compositions, and which implies $\Path = \Id$).
+There was a problem however for getting regularity for the universe, that was discovered by Dan Licata (from 
+discussions with Carlo Angiuli and Bob Harper). Thanks to this discovery, it was realized that 
+regularity is actually not needed for the model to work. In particular, the second author
+adapted the definition of filling from composition as in Section \ref{sec:kan-filling},
+the third author noticed that we can remove the condition $A = \Glue~[]~A$, and together with the last author,
+they derived the univalence axiom from the glueing operation as presented in the appendix.
+This was surprising since glueing was introduced
+a priori only as a way to transform equivalences into paths, but was later explained by a remark of Dan Licata
+(also presented in the appendix: we get univalence as soon as the transport map associated to this
+path is path equal to the given equivalence). 
+The second author introduced then the restriction operation $\Gamma,\varphi$
+on contexts, which, as noticed by Christian Sattler, can be seen as an explicit syntax for the notion of 
+cofibration, and designed the other proof of univalence in \sect{sec:univalence-axiom} from
+discussions between Nicola Gambino, Peter LeFanu Lumsdaine and the third author. Not having regularity, the type of 
+paths is not the same as the $\Id$ type but, as explained in \sect{sec:identitytypes}, we can recover
+the usual identity type from the path type, following an idea of Andrew Swan.
+
+\medskip
+
+The authors would like to thank the referees and Mart\'in Escard\'o, Georges Gonthier,
+Dan Grayson, Peter Hancock, Dan Licata, Peter LeFanu Lumsdaine,
+Christian Sattler, Andrew Swan, Vladimir Voevodsky for many
+interesting discussions and remarks.
+
+\bibliographystyle{plainurl}% the recommended bibstyle
+\bibliography{references}
+
+\newpage
+
+\appendix
+\input{appendix}
+
+\end{document}
+
+%% Local Variables:
+%% ispell-local-dictionary: "english"
+%% mode: latex flyspell
+%% TeX-master: "main"
+%% End:

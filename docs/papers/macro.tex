@@ -1,0 +1,166 @@
+\newcommand{\Haskell}{{\sc Haskell}}
+
+\newcommand{\eg}{{e.g.}}
+\newcommand{\ie}{{i.e.}}
+\newcommand{\cf}{{cf.}}
+
+\newcommand{\sect}[1]{Section~\ref{#1}}
+\newcommand{\fig}[1]{Figure~\ref{#1}}
+
+\renewcommand{\|}{{~\mid~}}
+\renewcommand{\:}{{\; : \;}}
+\renewcommand{\=}{{~~ = ~~}}
+
+\newcommand{\der}{\vdash}
+\newcommand{\emptyctxt}{()}
+\newcommand{\inctxt}[2]{#1\der#2}
+\newcommand{\inctxtT}[3]{#1\der#2~:#3}
+
+\newcommand{\set}[1]{\{ #1 \}}
+
+% the subst and mod macros
+\newcommand{\subst}[2]{(#1/#2)}
+%\newcommand{\subst}[2]{(#1=#2)}
+\renewcommand{\mod}[1]{\; ({\sf mod.} \; #1)}
+\newcommand{\hmapsto}{~}
+
+% generic name for an equivalence (used to be \sigma, now f)
+\newcommand\myeq{f}
+
+% path abstraction: <i>
+\newcommand{\pabs}[1]{{\langle}#1{\rangle} \; }
+
+% refl
+\newcommand{\refl}[1]{{1_{#1}}}   % {{\sf refl_{#1}}}
+\DeclareMathOperator{\transport}{\mathsf{transp}} % transport as special case of comp
+%\DeclareMathOperator{\J}{\mathsf{J}}
+\newcommand{\J}{\mathsf{J}}
+\DeclareMathOperator{\idrefl}{\mathsf{r}}
+
+\newcommand{\dM}{{\sf dM}}
+\newcommand{\II}{\mathbb{I}}
+\newcommand{\FF}{\mathbb{F}}
+
+
+% nat
+\newcommand{\NN}{{\sf N}}
+\newcommand{\natrec}{{\sf natrec}}
+\newcommand{\s}{{\sf s}}
+\newcommand{\suc}[1]{\s \; #1}
+\newcommand{\0}{{\sf 0}}
+
+\newcommand{\Id}{{\sf Id}}
+\newcommand{\ident}{{\sf id}}
+\newcommand{\Path}{{\sf Path}}
+\newcommand{\Equiv}{{\sf Equiv}}
+\newcommand{\isEquiv}{{\sf isEquiv}}
+\newcommand{\ext}{{\sf contr}}
+\newcommand{\isContr}{{\sf isContr}}
+
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\cod}{cod}
+
+\def\NN{\hbox{\sf N}}
+\def\Type{\hbox{\sf Type}}
+\def\Box{\hbox{\sf B}}
+\def\PER{\hbox{\sf PER}}
+\def\FUN{\Pi}
+\def\ELEM{\hbox{\sf El}}
+\def\GG{\hbox{\sf G}}
+\def\TP{\hbox{\sf TP}}
+\def\N0{\hbox{\sf N}_0}
+\def\ZERO{\hbox{\sf zero}}
+\def\SUCC{\hbox{s}}
+
+%% \newcommand{\app}{\mathsf{app}}
+\newcommand{\lam}[2]{{\langle}#1{\rangle}#2}
+%\newcommand{\id}{{1}}
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\pp}{{\sf p}}
+\newcommand{\qq}{{\sf q}}
+\newcommand{\comp}{{\sf comp}}
+\newcommand{\hcomp}{{\sf hcomp}}
+\newcommand{\pres}[1]{{\sf pres}^{#1}}
+\newcommand{\extend}{{\sf extend}}
+\newcommand{\eq}{{\sf equiv}}
+
+\newcommand{\Comp}{{\sf fill}}
+
+% HIT
+\newcommand{\base}{{\sf base}}
+\newcommand{\inc}{{\sf inc}}
+\newcommand{\inh}{\mathsf{inh}}
+\newcommand{\squash}{{\sf squash}}
+\newcommand{\transp}{{\sf transp}} % defined operation on HITs
+\newcommand{\squeeze}{{\sf squeeze}}
+\newcommand{\LOOP}{{\sf loop}}
+\newcommand{\Sp}{{\sf S}}
+
+% Universe
+\newcommand{\Glue}{{\sf Glue}}
+\newcommand{\glue}{{\sf glue}}
+\newcommand{\ugl}{{\sf unglue}}
+\newcommand{\U}{\mathsf{U}}
+\DeclareMathOperator{\eqToPath}{\mathsf{eqToPath}}
+\newcommand{\can}{\mathsf{pathToEq}} % "the" canonical map for ua
+
+% Semantics
+\newcommand{\Set}{\mathbf{Set}}
+\newcommand{\Top}{\mathbf{Top}}
+\DeclareMathOperator{\sing}{\mathrm{S}} 
+\newcommand{\CC}{\mathcal{C}}
+\renewcommand{\deg}{\mathrm{s}}
+\newcommand{\op}{\mathrm{op}}
+% \newcommand{\CdM}{\CC_\dM}
+\DeclareMathOperator{\Hom}{Hom}
+\newcommand{\cwf}{CwF}
+\DeclareMathOperator{\Ty}{Ty}
+\DeclareMathOperator{\FTy}{FTy} % for "fibrant" types
+\DeclareMathOperator{\Ter}{Ter}
+\newcommand{\den}[1]{[\![#1]\!]} % denotation
+\DeclareMathOperator{\yoneda}{\mathbf{y}}
+%\DeclareMathOperator{\scomp}{\mathbf{c}} % semantic composition
+\DeclareMathOperator{\scomp}{\mathtt{comp}} % semantic composition
+\DeclareMathOperator{\sGlue}{\mathtt{Glue}} % semantic Glue
+\DeclareMathOperator{\sglue}{\mathtt{glue}} % semantic glue
+\DeclareMathOperator{\sugl}{\mathtt{unglue}} % semantic unglue
+\newcommand{\sNN}{\mathtt{N}}
+
+%\DeclareMathOperator{\sequiv}{\mathbf{e}} % equivalence structure
+\DeclareMathOperator{\sequiv}{\mathtt{e}} % equivalence structure
+
+%\newcommand{\sPath}{\Path}
+\newcommand{\sPath}{\mathtt{Path}}
+\newcommand{\spabs}{\langle \, \rangle}
+
+\newcommand{\NAT}{\mathbb{N}}   % {0,1,2,..}
+\newcommand{\UU}{\mathtt{U}}   % semantic universe
+
+
+\DeclareMathOperator{\app}{\mathtt{app}}
+
+
+\DeclareMathOperator{\El}{\mathsf{El}}
+\newcommand{\code}[1]{\ulcorner #1 \urcorner}
+
+\tikzset{
+    comp line/.style={thick,draw=black,decorate, decoration={snake},
+      ->, >=stealth'},
+    path line/.style={thick,draw=black},
+    fun line/.style={thick,draw=black, ->, >=stealth'}
+}
+
+
+\tikzset{
+    comp line/.style={thick,draw=black,decorate, decoration={snake},
+      ->, >=stealth'},
+    path line/.style={thick,draw=black},
+    fun line/.style={thick,draw=black, ->, >=stealth'}
+}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
