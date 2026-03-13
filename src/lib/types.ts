@@ -5,7 +5,8 @@ export type VisualizationType =
   | 'cube'
   | 'composition'
   | 'transport'
-  | 'path-type-rule';
+  | 'path-type-rule'
+  | 'composition-rule';
 
 export interface VisualizationInfo {
   label: string;
@@ -48,5 +49,10 @@ export const VISUALIZATIONS: Record<VisualizationType, VisualizationInfo> = {
     label: 'Path Type Rule',
     icon: '⊢',
     description: 'Path type introduction rule with typing judgment',
+  },
+  'composition-rule': {
+    label: 'Composition Rule',
+    icon: '∘',
+    description: 'Composition operation - being extensible is preserved along paths',
   },
 };
