@@ -1,0 +1,320 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathpartir}
+\usepackage{stmaryrd}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+
+% Define CCHM-style macros (simplified, avoiding conflicts)
+\newcommand{\II}{\mathbb{I}}
+\newcommand{\UU}{\mathcal{U}}
+\newcommand{\Path}[3]{\mathsf{Path}_{#1}\,#2\,#3}
+\newcommand{\comp}[5]{\mathsf{comp}^{#1}\,#2\,[#3 \mapsto #4]\,#5}
+\newcommand{\transp}[3]{\mathsf{transp}^{#1}\,#2\,#3}
+\newcommand{\fillop}[5]{\mathsf{fill}^{#1}\,#2\,[#3 \mapsto #4]\,#5}
+\newcommand{\Glue}[2]{\mathsf{Glue}[#1]\,#2}
+\newcommand{\Equiv}[2]{\mathsf{Equiv}\,#1\,#2}
+\newcommand{\emptyf}{0_F}
+\newcommand{\id}{\mathsf{id}}
+
+\title{Cubical Type Theory Visualizer\\Design Document}
+\author{Oguri Cap}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Goal}
+
+Transform the current geometric primitive visualizations into \textbf{interactive rule-based visualizations} that teach the core typing rules and computational behavior of Cubical Type Theory.
+
+\section{Current State}
+
+\begin{itemize}
+\item[\checkmark] Basic geometric primitives: interval, paths, squares, cubes
+\item[$\times$] No typing rules shown
+\item[$\times$] No computational behavior demonstrated
+\item[$\times$] Limited educational value
+\end{itemize}
+
+\section{Design Philosophy}
+
+\subsection{What Makes a Good Rule Visualization?}
+
+\begin{enumerate}
+\item \textbf{Show the typing judgment} -- display the rule in CCHM notation
+\item \textbf{Geometric intuition} -- 3D representation of what the rule means spatially
+\item \textbf{Interactive transformation} -- let users manipulate terms and see how they evaluate
+\item \textbf{Step-by-step computation} -- show reduction/evaluation steps
+\end{enumerate}
+
+\subsection{Notation System}
+
+Follow CCHM paper exactly:
+\begin{itemize}
+\item Interval: $\II$ with endpoints $0$, $1$, names $i, j, k$
+\item Face formulas: $\varphi, \psi ::= 0_F \mid 1_F \mid (i = 0) \mid (i = 1) \mid \varphi \wedge \psi \mid \varphi \vee \psi$
+\item Path types: $\Path{A}{u}{v}$ (dependent paths from $u$ to $v$ in type $A$)
+\item Composition: $\comp{i}{A}{\varphi}{u}{a_0}$
+\item Transport: $\transp{i}{A}{a}$ (special case: $\comp{i}{A}{\emptyf}{}{a}$)
+\item Glue: $\Glue[\varphi \mapsto (T, f)]{A}$
+\end{itemize}
+
+\section{Priority Rules to Visualize}
+
+\subsection{Tier 1: Foundation (Must Have)}
+
+These unlock understanding of the entire system.
+
+\subsubsection{Path Types -- Introduction \& Elimination}
+
+\textbf{Typing Rule:}
+\begin{mathpar}
+\inferrule
+  {\Gamma, i : \II \vdash t : A}
+  {\Gamma \vdash \langle i \rangle t : \Path{A}{t(i_0)}{t(i_1)}}
+\end{mathpar}
+
+\textbf{Visualization:}
+\begin{itemize}
+\item Show interval $\II$ as a line segment with endpoints
+\item Animate $t$ varying along $i$ from $0$ to $1$
+\item Display the path as a continuous curve in the type space
+\item Interactive: user can scrub $i$ to see $t(i)$ at different points
+\end{itemize}
+
+\textbf{Computation:}
+\begin{itemize}
+\item Path application: $(\langle i \rangle t)\ r$ reduces to $t(i/r)$
+\item Show substitution visually
+\end{itemize}
+
+\subsubsection{Composition -- The Heart of Cubical}
+
+\textbf{Typing Rule:}
+\begin{mathpar}
+\inferrule
+  {\Gamma, i : \II \vdash A \\ \Gamma \vdash \varphi : F \\ \Gamma, \varphi, i : \II \vdash u : A \\ \Gamma \vdash a_0 : A(i_0)[\varphi \mapsto u(i_0)]}
+  {\Gamma \vdash \comp{i}{A}{\varphi}{u}{a_0} : A(i_1)[\varphi \mapsto u(i_1)]}
+\end{mathpar}
+
+\textbf{Visualization:}
+\begin{itemize}
+\item Show an ``open box'' (partial cube with some faces specified by $\varphi$)
+\item The base $a_0$ at $i=0$
+\item The partial sides $u$ defined on extent $\varphi$
+\item Animate filling the box to compute the lid at $i=1$
+\item \textbf{Key insight:} ``Being extensible is preserved along paths''
+\end{itemize}
+
+\textbf{Example: Transitivity}
+
+Given $p : \Path{A}{a}{b}$ and $q : \Path{A}{b}{c}$, we can construct:
+\[
+\langle i \rangle \comp{j}{A}{(i=0) \mapsto a, (i=1) \mapsto q\ j}{}{p\ i} : \Path{A}{a}{c}
+\]
+
+Visualize as a square with dashed diagonal:
+\begin{center}
+\begin{tikzcd}
+a \arrow[r] \arrow[d, "p"'] & c \\
+b \arrow[ur, dashed, "{\text{result}}"'] & 
+\end{tikzcd}
+\end{center}
+
+\subsubsection{Transport}
+
+\textbf{Typing Rule:}
+\begin{mathpar}
+\inferrule
+  {\Gamma, i : \II \vdash A \\ \Gamma \vdash a : A(i_0)}
+  {\Gamma \vdash \transp{i}{A}{a} : A(i_1)}
+\end{mathpar}
+
+\textbf{Visualization:}
+\begin{itemize}
+\item Show type $A$ varying along $i$ (e.g., morphing shape)
+\item Element $a$ at $A(i_0)$ being ``transported'' to $A(i_1)$
+\item This is $\comp{i}{A}{\emptyf}{}{a}$ (composition with empty extent)
+\end{itemize}
+
+\textbf{Example:} Transport along $\Path{\UU}{\mathbb{N}}{\mathbb{B}}$ (if we had a universe)
+
+\subsection{Tier 2: Advanced (Should Have)}
+
+\subsubsection{Kan Filling}
+
+\textbf{Definition:}
+\[
+\fill{i}{A}{\varphi}{u}{a_0} = \comp{j}{A(i/i \wedge j)}{\varphi \mapsto u(i/i \wedge j), (i=0) \mapsto a_0}{}{a_0}
+\]
+
+\textbf{Visualization:}
+\begin{itemize}
+\item Show both the lid (composition) AND the interior (filling)
+\item Animate the filling process from $i=0$ to $i=1$
+\item Display: $v(i_0) = a_0$, $v(i_1) = \comp{i}{A}{\varphi}{u}{a_0}$, $v = u$ on $\varphi$
+\end{itemize}
+
+\subsubsection{Glue Types -- Univalence}
+
+\textbf{Typing Rule:}
+\begin{mathpar}
+\inferrule
+  {\Gamma \vdash \varphi : F \\ \Gamma, \varphi \vdash T \\ \Gamma, \varphi \vdash f : \Equiv{T}{A} \\ \Gamma \vdash A}
+  {\Gamma \vdash \Glue[\varphi \mapsto (T, f)]{A}}
+\end{mathpar}
+
+\textbf{Visualization:}
+\begin{itemize}
+\item Show partial type $T$ on extent $\varphi$
+\item Show total type $A$
+\item Equivalence $f : T \simeq A$ as a bidirectional morphing
+\item Glue operation ``glues'' them together along $\varphi$
+\end{itemize}
+
+\textbf{Diagram (from paper):}
+\begin{center}
+\begin{tikzcd}
+& \Glue[\varphi \mapsto (T, f)]{A} \arrow[dl] \arrow[dr] & \\
+T \arrow[rr, "f \simeq"] & & A
+\end{tikzcd}
+\end{center}
+
+\textbf{Example: Path from Equivalence}
+
+Given $f : \Equiv{A}{B}$, define:
+\[
+E = \Glue[(i=0) \mapsto (A, f), (i=1) \mapsto (B, \id_B)]{B}
+\]
+Then:
+\begin{itemize}
+\item At $i=0$: $E = A$
+\item At $i=1$: $E = B$
+\item Result: $\Path{\UU}{A}{B}$ (univalence!)
+\end{itemize}
+
+\subsection{Tier 3: Nice to Have}
+
+\subsubsection{Composition for Specific Types}
+
+Show how composition is defined by induction on types:
+
+\paragraph{Product types:} $C = (x : A) \to B$
+
+For $\Gamma, \varphi, i : \II \vdash \mu : C$ and $\Gamma \vdash \lambda_0 : C(i_0)[\varphi \mapsto \mu(i_0)]$, given $\Gamma \vdash u_1 : A(i_1)$:
+\begin{align*}
+w &= \fill{i}{A(i/1-i)}{\emptyf}{}{u_1} \\
+v &= w(i/1-i) \\
+(\comp{i}{C}{\varphi}{\mu}{\lambda_0})\ u_1 &= \comp{i}{B(x/v)}{\varphi \mapsto \mu\ v}{}{\lambda_0\ v(i_0)}
+\end{align*}
+
+\paragraph{Path types:} $C = \Path{A}{u}{v}$
+
+For $\Gamma, \varphi, i : \II \vdash p : C$ and $\Gamma \vdash p_0 : C(i_0)[\varphi \mapsto p(i_0)]$:
+\[
+\comp{i}{C}{\varphi}{p}{p_0} = \langle j \rangle \comp{i}{A}{\varphi \mapsto p\ j, (j=0) \mapsto u, (j=1) \mapsto v}{}{p_0\ j}
+\]
+
+\subsubsection{Systems and Face Formulas}
+
+Interactive tool to:
+\begin{itemize}
+\item Build face formulas $\varphi$ visually (select faces of a cube)
+\item Show systems $[\varphi_1 \mapsto t_1, \ldots, \varphi_n \mapsto t_n]$ as partial definitions
+\item Visualize compatibility conditions: $\Gamma, \varphi_i \wedge \varphi_j \vdash t_i = t_j$
+\end{itemize}
+
+\section{Implementation Strategy}
+
+\subsection{Phase 1: Refactor Current Code}
+\begin{enumerate}
+\item Extract common 3D utilities (camera, controls, text rendering)
+\item Create a \texttt{Rule} component that displays:
+  \begin{itemize}
+  \item Rule name
+  \item Typing judgment (rendered LaTeX or formatted text)
+  \item 3D scene
+  \item Interactive controls
+  \end{itemize}
+\item Separate geometric primitives into reusable modules
+\end{enumerate}
+
+\subsection{Phase 2: Implement Tier 1 Rules}
+\begin{enumerate}
+\item \textbf{Path types} -- simplest, builds on existing interval viz
+\item \textbf{Transport} -- shows type-varying behavior
+\item \textbf{Composition} -- most complex, most important
+\end{enumerate}
+
+\subsection{Phase 3: Add Interactivity}
+\begin{itemize}
+\item Sliders for interval variables ($i$, $j$)
+\item Buttons to step through computation
+\item Input fields to change terms
+\item ``Play'' animation for automatic stepping
+\end{itemize}
+
+\subsection{Phase 4: Implement Tier 2 \& 3}
+\begin{itemize}
+\item Kan filling
+\item Glue types
+\item Type-specific compositions
+\end{itemize}
+
+\section{Technical Considerations}
+
+\subsection{3D Representation Challenges}
+\begin{itemize}
+\item \textbf{Abstract types:} How to visualize $A : \Type$? Use abstract shapes (spheres, tori)?
+\item \textbf{Higher dimensions:} Cubes are 3D, but we have arbitrary dimensions. Use projections?
+\item \textbf{Equivalences:} How to show $f : \Equiv{T}{A}$? Morphing animation?
+\end{itemize}
+
+\subsection{UI/UX}
+\begin{itemize}
+\item Split screen: rule on left, visualization on right
+\item Step-by-step mode vs. continuous animation
+\item Tooltips explaining each part of the rule
+\item ``Why does this work?'' explanations
+\end{itemize}
+
+\subsection{Performance}
+\begin{itemize}
+\item Three.js can handle complex scenes
+\item May need LOD (level of detail) for higher-dimensional objects
+\item Lazy loading for complex rules
+\end{itemize}
+
+\section{Success Criteria}
+
+A learner should be able to:
+\begin{enumerate}
+\item Understand what composition \emph{does} geometrically
+\item See how transport is a special case of composition
+\item Grasp why Glue types enable univalence
+\item Experiment with different terms and see how they compute
+\item Build intuition for why the rules are well-typed
+\end{enumerate}
+
+\section{References}
+
+\begin{itemize}
+\item CCHM Paper: \textit{Cubical Type Theory: a constructive interpretation of the univalence axiom} \\
+  \url{https://arxiv.org/abs/1611.02108}
+\item Cubical Agda Paper: \textit{Cubical Agda: A Dependently Typed Programming Language with Univalence and Higher Inductive Types} \\
+  \url{https://staff.math.su.se/anders.mortberg/papers/cubicalagda2.pdf}
+\item Cubical Agda Documentation: \\
+  \url{https://agda.readthedocs.io/en/latest/language/cubical.html}
+\item 1lab (Cubical Agda formalization): \\
+  \url{https://1lab.dev/}
+\end{itemize}
+
+\end{document}
