@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import * as THREE from 'three';
-  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   import type { VisualizationType } from './types';
   import { createInterval } from './createInterval';
   import { createPath } from './createPath';
@@ -9,11 +8,18 @@
   import { createCube } from './createCube';
   import { createComposition } from './createComposition';
   import { createTransport } from './createTransport';
+  import { createCamera, updateCameraAspect } from './three/camera';
+  import { createOrbitControls } from './three/controls';
+  import { createRenderer, updateRendererSize } from './three/renderer';
+  import { createScene } from './three/scene';
 
   let { visualization }: { visualization: VisualizationType } = $props();
 
   let canvas: HTMLCanvasElement;
   let scene: THREE.Scene;
+  let camera: THREE.PerspectiveCamera;
+  let renderer: THREE.WebGLRenderer;
+  let controls: ReturnType<typeof createOrbitControls>;
   let currentGroup: THREE.Group | undefined;
   let currentAnimate: ((time: number) => void) | undefined;
   let sceneReady = $state(false);
@@ -60,38 +66,11 @@
   });
 
   onMount(() => {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
-
-    const camera = new THREE.PerspectiveCamera(
-      50,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      100,
-    );
-    camera.position.set(0, 0.8, 3);
-    camera.lookAt(0, 0, 0);
-
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const pointLight = new THREE.PointLight(0xffffff, 1.2, 50);
-    pointLight.position.set(2, 3, 4);
-    scene.add(pointLight);
-
-    const gridHelper = new THREE.GridHelper(4, 20, 0x333355, 0x222244);
-    gridHelper.position.y = -0.5;
-    scene.add(gridHelper);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.minDistance = 1;
-    controls.maxDistance = 10;
-    controls.target.set(0, 0, 0);
-    controls.update();
+    // Initialize scene using utilities
+    scene = createScene();
+    camera = createCamera();
+    renderer = createRenderer(canvas);
+    controls = createOrbitControls(camera, renderer.domElement);
 
     sceneReady = true;
 
@@ -108,9 +87,8 @@
     animate();
 
     function onResize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      updateCameraAspect(camera, window.innerWidth / window.innerHeight);
+      updateRendererSize(renderer, window.innerWidth, window.innerHeight);
     }
     window.addEventListener('resize', onResize);
 
