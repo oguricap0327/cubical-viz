@@ -6,21 +6,22 @@
   import { createOrbitControls } from '../three/controls';
   import { createRenderer, updateRendererSize } from '../three/renderer';
   import { createScene } from '../three/scene';
+  import type { Snippet } from 'svelte';
 
-  let { rule }: { rule: RuleDefinition } = $props();
+  let { rule, controls }: { rule: RuleDefinition; controls?: Snippet } = $props();
 
   let canvas: HTMLCanvasElement;
   let scene: THREE.Scene;
   let camera: THREE.PerspectiveCamera;
   let renderer: THREE.WebGLRenderer;
-  let controls: ReturnType<typeof createOrbitControls>;
+  let orbitControls: ReturnType<typeof createOrbitControls>;
 
   onMount(() => {
     // Initialize Three.js using utilities
     scene = createScene();
     camera = createCamera();
     renderer = createRenderer(canvas);
-    controls = createOrbitControls(camera, renderer.domElement);
+    orbitControls = createOrbitControls(camera, renderer.domElement);
 
     // Call rule-specific setup
     rule.setup(scene, camera);
@@ -37,7 +38,7 @@
         rule.update(time);
       }
       
-      controls.update();
+      orbitControls.update();
       renderer.render(scene, camera);
     }
     animate();
@@ -58,7 +59,7 @@
         rule.cleanup(scene);
       }
       
-      controls.dispose();
+      orbitControls.dispose();
       renderer.dispose();
     };
   });
@@ -77,7 +78,11 @@
     <canvas bind:this={canvas}></canvas>
   </div>
 
-  {#if rule.controls}
+  {#if controls}
+    <div class="controls">
+      {@render controls()}
+    </div>
+  {:else if rule.controls}
     <div class="controls">
       {#if typeof rule.controls === 'function'}
         {@const Component = rule.controls}

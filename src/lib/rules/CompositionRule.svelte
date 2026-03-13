@@ -3,8 +3,12 @@
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
   import { createTextSprite } from '../textSprite';
+  import Slider from '../controls/Slider.svelte';
+  import PlayPause from '../controls/PlayPause.svelte';
 
-  let animationTime = $state(0);
+  let timeValue = $state(0);
+  let playing = $state(true);
+  let manualControl = $state(false);
 
   const compositionRule: RuleDefinition = {
     name: "Composition - The Heart of Cubical",
@@ -106,15 +110,19 @@
     },
     
     update: (time: number) => {
-      animationTime = time;
       const scene = (window as any)._currentScene;
       if (!scene) return;
       
       const lid = (scene as any)._lid;
       if (lid) {
-        // Animate lid opacity (filling the box)
-        const t = (Math.sin(time * 0.5) + 1) / 2;
+        // Use manual control if slider is being used, otherwise animate
+        const t = manualControl ? timeValue : (Math.sin(time * 0.5) + 1) / 2;
         lid.material.opacity = t * 0.7;
+        
+        // Update timeValue for display
+        if (!manualControl && playing) {
+          timeValue = t;
+        }
       }
     },
     
@@ -132,6 +140,40 @@
       (window as any)._currentScene = null;
     };
   });
+
+  function handleSliderChange(value: number) {
+    timeValue = value;
+    manualControl = true;
+  }
+
+  function handlePlayPause(isPlaying: boolean) {
+    playing = isPlaying;
+    if (isPlaying) {
+      manualControl = false;
+    }
+  }
 </script>
 
-<Rule rule={compositionRule} />
+<Rule rule={compositionRule}>
+  {#snippet controls()}
+    <div class="controls-container">
+      <PlayPause {playing} onToggle={handlePlayPause} />
+      <Slider 
+        bind:value={timeValue}
+        min={0}
+        max={1}
+        step={0.01}
+        label="Filling Progress (i)"
+        onChange={handleSliderChange}
+      />
+    </div>
+  {/snippet}
+</Rule>
+
+<style>
+  .controls-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+</style>
