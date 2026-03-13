@@ -3,12 +3,17 @@
   import Controls from './lib/Controls.svelte';
   import PathTypeRule from './lib/rules/PathTypeRule.svelte';
   import CompositionRule from './lib/rules/CompositionRule.svelte';
+  import TransportRule from './lib/rules/TransportRule.svelte';
   import { type VisualizationType, VISUALIZATIONS } from './lib/types';
 
   let current: VisualizationType = $state('interval');
 
   // Determine if current visualization is a rule-based one
-  let isRuleBased = $derived(current === 'path-type-rule' || current === 'composition-rule');
+  let isRuleBased = $derived(
+    current === 'path-type-rule' || 
+    current === 'composition-rule' || 
+    current === 'transport-rule'
+  );
 </script>
 
 <main>
@@ -18,6 +23,8 @@
       <PathTypeRule />
     {:else if current === 'composition-rule'}
       <CompositionRule />
+    {:else if current === 'transport-rule'}
+      <TransportRule />
     {/if}
   {:else}
     <!-- Legacy geometric visualizations -->
