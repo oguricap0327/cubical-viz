@@ -1,0 +1,2199 @@
+Cubical Type Theory: a constructive interpretation of
+the univalence axiom∗
+
+arXiv:1611.02108v1 [cs.LO] 7 Nov 2016
+
+Cyril Cohen, Thierry Coquand, Simon Huber, and Anders Mörtberg
+
+Abstract
+This paper presents a type theory in which it is possible to directly manipulate
+n-dimensional cubes (points, lines, squares, cubes, etc.) based on an interpretation of
+dependent type theory in a cubical set model. This enables new ways to reason about
+identity types, for instance, function extensionality is directly provable in the system.
+Further, Voevodsky’s univalence axiom is provable in this system. We also explain an
+extension with some higher inductive types like the circle and propositional truncation.
+Finally we provide semantics for this cubical type theory in a constructive meta-theory.
+
+Contents
+1 Introduction
+
+2
+
+2 Basic type theory
+
+3
+
+3 Path types
+3.1 Syntax and inference rules . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+3.2 Examples . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+3
+5
+6
+
+4 Systems, composition, and transport
+4.1 The face lattice . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.2 Syntax and inference rules for systems . . . . . . . . . . . . . . . . . . . . . .
+4.3 Composition operation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.4 Kan filling operation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4.5 Equality judgments for composition . . . . . . . . . . . . . . . . . . . . . . .
+4.6 Transport . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+7
+7
+9
+10
+11
+11
+12
+
+5 Derived notions and operations
+5.1 Contractible types . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+5.2 The pres operation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+5.3 The equiv operation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+12
+12
+12
+13
+
+6 Glueing
+13
+6.1 Syntax and inference rules for glueing . . . . . . . . . . . . . . . . . . . . . . 13
+6.2 Composition for glueing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+7 Universe and the univalence axiom
+15
+7.1 Composition for the universe . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+7.2 The univalence axiom . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+∗ This material is based upon work supported by the National Science Foundation under agreement No.
+DMS-1128155. Any opinions, findings and conclusions or recommendations expressed in this material are
+those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
+
+1
+
+8 Semantics
+8.1 The category of cubes and cubical sets . . . . . . . . . . . . . . . . . . . . . .
+8.2 Presheaf semantics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+8.3 Interpretation of the syntax . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+17
+17
+18
+21
+
+9 Extensions: identity types and higher inductive types
+24
+9.1 Identity types . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+9.2 Higher inductive types . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+10 Related and future work
+
+27
+
+A Details of composition for glueing
+
+30
+
+B Univalence from glueing
+
+32
+
+C Singular cubical sets
+
+33
+
+1
+
+Introduction
+
+This work is a continuation of the program started in [6, 13] to provide a constructive
+justification of Voevodsky’s univalence axiom [27]. This axiom allows many improvements
+for the formalization of mathematics in type theory: function extensionality, identification
+of isomorphic structures, etc. In order to preserve the good computational properties of type
+theory it is crucial that postulated constants have a computational interpretation. Like in
+[6, 13, 22] our work is based on a nominal extension of λ-calculus, using names to represent
+formally elements of the unit interval [0, 1]. This paper presents two main contributions.
+The first one is a refinement of the semantics presented in [6, 13]. We add new operations
+on names corresponding to the fact that the interval [0, 1] is canonically a de Morgan algebra [3]. This allows us to significantly simplify our semantical justifications. In the previous
+work, we noticed that it is crucial for the semantics of higher inductive types [26] to have
+a “diagonal” operation. By adding this operation we can provide a semantical justification
+of some higher inductive types and we give two examples (the spheres and propositional
+truncation). Another shortcoming of the previous work was that using path types as equality types did not provide a justification of the computation rule of the Martin-Löf identity
+type [19] as a judgmental equality. This problem has been solved by Andrew Swan [25],
+in the framework of [6, 13, 22], who showed that we can define a new type, equivalent to,
+but not judgmentally equal to the path type. This has a simple definition in the present
+framework.
+The second contribution is the design of a type system1 inspired by this semantics which
+extends Martin-Löf type theory [20, 19]. We add two new operations on contexts: addition
+of new names representing dimensions and a restriction operation. Using these we can define
+a notion of extensibility which generalizes the notion of being connected by a path, and then
+a Kan composition operation that expresses that being extensible is preserved along paths.
+We also define a new operation on types which expresses that this notion of extensibility is
+preserved by equivalences. The axiom of univalence, and composition for the universe, are
+then both expressible using this new operation.
+The paper is organized as follows. The first part, Sections 2 to 7, presents the type
+system. The second part, Section 8, provides its semantics in cubical sets. Finally, in
+Section 9, we present two possible extensions: the addition of an identity type, and two
+examples of higher inductive types.
+1 We have implemented a type-checker for this system in Haskell, which is available at:
+https://github.com/mortberg/cubicaltt
+
+2
+
+2
+
+Basic type theory
+
+In this section we introduce the version of dependent type theory on which the rest of the
+paper is based. This presentation is standard, but included for completeness. The type
+theory that we consider has a type of natural numbers, but no universes (we consider the
+addition of universes in Section 7). It also has β and η-conversion for dependent functions
+and surjective pairing for dependent pairs.
+The syntax of contexts, terms and types is specified by:
+Γ, ∆
+
+::=
+
+() | Γ, x : A
+
+Contexts
+
+t, u, A, B
+
+::=
+|
+|
+
+x | λx : A. t | t u | (x : A) → B
+(t, u) | t.1 | t.2 | (x : A) × B
+0 | s u | natrec t u | N
+
+Π-types
+Σ-types
+Natural numbers
+
+We write A → B for the non-dependent function space and A × B for the type of nondependent pairs. Terms and types are considered up to α-equivalence of bound variables.
+Substitutions, written σ = (x1 /u1 , . . . , xn /un ), are defined to act on expressions as usual,
+i.e., simultaneously replacing xi by ui , renaming bound variables whenever necessary. The
+inference rules of this system are presented in Figure 1 where in the η-rule for Π- and Σ-types
+we omitted the premises that t and u should have the respective type.
+We define ∆ ⊢ σ : Γ by induction on Γ. We have ∆ ⊢ () : () (empty substitution) and
+∆ ⊢ (σ, x/u) : Γ, x : A if ∆ ⊢ σ : Γ and ∆ ⊢ u : Aσ.
+We write J for an arbitrary judgment and, as usual, we consider also hypothetical judgments Γ ⊢ J in a context Γ.
+The following lemma will be valid for all extensions of type theory we consider below.
+Lemma 1. Substitution is admissible:
+Γ⊢J
+
+∆⊢σ:Γ
+∆ ⊢ Jσ
+
+In particular, weakening is admissible, i.e., a judgment valid in a context stays valid in any
+extension of this context.
+
+3
+
+Path types
+
+As in [6, 22] we assume that we are given a discrete infinite set of names (representing
+directions) i, j, k, . . . We define I to be the free de Morgan algebra [3] on this set of names.
+This means that I is a bounded distributive lattice with top element 1 and bottom element
+0 with an involution 1 − r satisfying:
+1−0= 1
+
+1−1= 0
+
+1 − (r ∨ s) = (1 − r) ∧ (1 − s)
+
+1 − (r ∧ s) = (1 − r) ∨ (1 − s)
+
+The elements of I can hence be described by the following grammar:
+r, s
+
+::=
+
+0 | 1 | i | 1−r | r∧s | r∨s
+
+The set I also has decidable equality, and as a distributive lattice, it can be described as
+the free distributive lattice generated by symbols i and 1 − i [3]. As in [6], the elements
+in I can be thought as formal representations of elements in [0, 1], with r ∧ s representing
+min(r, s) and r ∨ s representing max(r, s). With this in mind it is clear that (1 − r) ∧ r 6= 0
+and (1 − r) ∨ r 6= 1 in general.
+
+3
+
+Well-formed contexts, Γ ⊢ (The condition x ∈
+/ dom(Γ) means that x is not declared in Γ)
+Γ⊢A
+Γ, x : A ⊢
+
+() ⊢
+
+(x ∈
+/ dom(Γ))
+
+Well-formed types, Γ ⊢ A
+Γ, x : A ⊢ B
+Γ ⊢ (x : A) → B
+
+Γ, x : A ⊢ B
+Γ ⊢ (x : A) × B
+
+Γ⊢
+Γ⊢N
+
+Well-typed terms, Γ ⊢ t : A
+Γ⊢t:A
+Γ⊢A=B
+Γ⊢t:B
+
+Γ, x : A ⊢ t : B
+Γ ⊢ λx : A. t : (x : A) → B
+
+Γ⊢
+(x : A ∈ Γ)
+Γ⊢x:A
+
+Γ ⊢ t : (x : A) × B
+Γ ⊢ t.1 : A
+
+Γ ⊢ t : (x : A) × B
+Γ ⊢ t.2 : B(x/t.1)
+
+Γ ⊢ t : (x : A) → B
+Γ⊢u:A
+Γ ⊢ t u : B(x/u)
+
+Γ, x : A ⊢ B
+Γ⊢t:A
+Γ ⊢ u : B(x/t)
+Γ ⊢ (t, u) : (x : A) × B
+Γ, x : N ⊢ P
+
+Γ⊢
+Γ⊢0:N
+
+Γ⊢n:N
+Γ⊢sn:N
+
+Γ ⊢ a : P (x/0)
+Γ ⊢ b : (n : N) → P (x/n) → P (x/s n)
+Γ ⊢ natrec a b : (x : N) → P
+
+Type equality, Γ ⊢ A = B (Congruence and equivalence rules which are omitted)
+Term equality, Γ ⊢ a = b : A (Congruence and equivalence rules are omitted)
+Γ, x : A ⊢ t : B
+Γ⊢u:A
+Γ ⊢ (λx : A. t) u = t(x/u) : B(x/u)
+
+Γ⊢t=u:A
+Γ⊢A=B
+Γ⊢t=u:B
+Γ, x : A ⊢ t x = u x : B
+Γ ⊢ t = u : (x : A) → B
+
+Γ, x : A ⊢ B
+
+Γ⊢t:A
+Γ ⊢ u : B(x/t)
+Γ ⊢ (t, u).1 = t : A
+
+Γ, x : A ⊢ B
+Γ⊢t:A
+Γ ⊢ u : B(x/t)
+Γ ⊢ (t, u).2 = u : B(x/t)
+Γ, x : A ⊢ B
+
+Γ, x : N ⊢ P
+
+Γ, x : N ⊢ P
+
+Γ ⊢ t.1 = u.1 : A
+Γ ⊢ t.2 = u.2 : B(x/t.1)
+Γ ⊢ t = u : (x : A) × B
+
+Γ ⊢ a : P (x/0)
+Γ ⊢ b : (n : N) → P (x/n) → P (x/s n)
+Γ ⊢ natrec a b 0 = a : P (x/0)
+
+Γ ⊢ a : P (x/0)
+Γ ⊢ b : (n : N) → P (x/n) → P (x/s n)
+Γ ⊢ natrec a b (s n) = b n (natrec a b n) : P (x/s n)
+Figure 1: Inference rules of the basic type theory
+
+4
+
+Γ⊢n:N
+
+Remark. We could instead also use a so-called Kleene algebra [15], i.e., a de Morgan algebra
+satisfying in addition r ∧ (1 − r) ⩽ s ∨ (1 − s). The free Kleene algebra on the set of names
+can be described as above but by additionally imposing the equations i ∧ (1 − i) ⩽ j ∨ (1 − j)
+on the generators; this still has a decidable equality. Note that [0, 1] with the operations
+described above is a Kleene algebra. With this added condition, r = s if, and only if, their
+interpretations in [0, 1] are equal. A consequence of using a Kleene algebra instead would
+be that more terms would be judgmentally equal in the type theory.
+
+3.1
+
+Syntax and inference rules
+
+Contexts can now be extended with name declarations:
+Γ, ∆ ::=
+
+. . . | Γ, i : I
+
+together with the context rule:
+Γ⊢
+(i ∈
+/ dom(Γ))
+Γ, i : I ⊢
+A judgment of the form Γ ⊢ r : I means that Γ ⊢ and r in I depends only on the names
+declared in Γ. The judgment Γ ⊢ r = s : I means that r and s are equal as elements of I,
+Γ ⊢ r : I, and Γ ⊢ s : I. Note, that judgmental equality for I will be re-defined once we
+introduce restricted contexts in Section 4.
+The extension to the syntax of basic dependent type theory is:
+t, u, A, B
+
+::=
+|
+
+...
+Path A t u | hii t | t r
+
+Path types
+
+Path abstraction, hii t, binds the name i in t, and path application, t r, applies a term t to
+an element r : I. This is similar to the notion of name-abstraction in nominal sets [21].
+The substitution operation now has to be extended to substitutions of the form (i/r).
+There are special substitutions of the form (i/0) and (i/1) corresponding to taking faces of
+an n-dimensional cube, we write these simply as (i0) and (i1).
+The inference rules for path types are presented in Figure 2 where again in the η-rule
+we omitted that t and u should be appropriately typed.
+Γ⊢A
+
+Γ⊢A
+Γ, i : I ⊢ t : A
+Γ ⊢ hii t : Path A t(i0) t(i1)
+
+Γ⊢t:A
+Γ⊢u:A
+Γ ⊢ Path A t u
+
+Γ ⊢ t : Path A u0 u1
+Γ⊢tr:A
+Γ, i : I ⊢ t i = u i : A
+Γ ⊢ t = u : Path A u0 u1
+
+Γ⊢r:I
+
+Γ⊢A
+
+Γ, i : I ⊢ t : A
+Γ⊢r:I
+Γ ⊢ (hii t) r = t(i/r) : A
+
+Γ ⊢ t : Path A u0 u1
+Γ ⊢ t 0 = u0 : A
+
+Γ ⊢ t : Path A u0 u1
+Γ ⊢ t 1 = u1 : A
+
+Figure 2: Inference rules for path types
+We define 1a : Path A a a as 1a = hii a, which corresponds to a proof of reflexivity.
+The intuition is that a type in a context with n names corresponds to an n-dimensional
+cube:
+
+5
+
+() ⊢ A
+
+•A
+
+i:I⊢A
+
+A
+
+A(i0)
+A(i0)(j1)
+
+i : I, j : I ⊢ A
+
+A(j1)
+
+A(i1)
+A(i1)(j1)
+
+A(i0)
+
+A(i1)
+
+A(i0)(j0)
+
+A(j0)
+
+..
+.
+
+A(i1)(j0)
+
+..
+.
+
+Note that A(i0)(j0) = A(j0)(i0). The substitution (i/j) corresponds to renaming a
+dimension, while (i/1 − i) corresponds to the inversion of a path. If we have i : I ⊢ p with
+p(i0) = a and p(i1) = b then it can be seen as a line
+a
+
+p
+
+b
+
+in direction i, then:
+b
+
+p(i/1 − i)
+
+a
+
+The substitutions (i/i ∧ j) and (i/i ∨ j) correspond to special kinds of degeneracies called
+connections [7]. The connections p(i/i ∧ j) and p(i/i ∨ j) can be drawn as the squares:
+p
+
+a
+
+p(i1)
+
+b
+
+b
+
+b
+j
+
+p(i/i ∧ j)
+
+p(i0)
+
+a
+
+p(i0)
+
+p(i/j)
+
+p(i/i ∨ j)
+
+p(i/j)
+
+a
+
+a
+
+p
+
+p(i1)
+
+i
+
+b
+
+where, for instance, the right-hand side of the left square is computed as
+p(i/i ∧ j)(i1) = p(i/1 ∧ j) = p(i/j)
+and the bottom and left-hand sides are degenerate.
+
+3.2
+
+Examples
+
+Representing equalities using path types allows novel definitions of many standard operations on identity types that are usually proved by identity elimination. For instance, the
+fact that the images of two equal elements are equal can be defined as:
+Γ⊢a:A
+
+Γ⊢b:A
+Γ⊢f :A→B
+Γ ⊢ p : Path A a b
+Γ ⊢ hii f (p i) : Path B (f a) (f b)
+
+This operation satisfies some judgmental equalities that do not hold judgmentally when the
+identity type is defined as an inductive family (see Section 7.2 of [6] for details).
+We can also define new operations, for instance, function extensionality for path types
+can be proved as:
+Γ ⊢ f : (x : A) → B
+
+Γ ⊢ g : (x : A) → B
+Γ ⊢ p : (x : A) → Path B (f x) (g x)
+Γ ⊢ hii λx : A. p x i : Path ((x : A) → B) f g
+6
+
+To see that this is correct we check that the term has the correct faces, for instance:
+(hii λx : A. p x i) 0 = λx : A. p x 0 = λx : A. f x = f
+We can also justify the fact that singletons are contractible, that is, that any element in
+(x : A) × (Path A a x) is equal to (a, 1a ):
+Γ ⊢ p : Path A a b
+Γ ⊢ hii (p i, hji p (i ∧ j)) : Path ((x : A) × (Path A a x)) (a, 1a ) (b, p)
+As in the previous work [6, 13] we need to add composition operations, defined by induction on the type, in order to justify the elimination principle for paths.
+
+4
+
+Systems, composition, and transport
+
+In this section we define the operation of context restriction which will allow us to describe
+new geometrical shapes corresponding to “sub-polyhedra” of a cube. Using this we can
+define the composition operation. From this operation we will also be able to define the
+transport operation and the elimination principle for Path types.
+
+4.1
+
+The face lattice
+
+The face lattice, F, is the distributive lattice generated by symbols (i = 0) and (i = 1) with
+the relation (i = 0) ∧ (i = 1) = 0F . The elements of the face lattice, called face formulas,
+can be described by the grammar
+ϕ, ψ
+
+::= 0F | 1F | (i = 0) | (i = 1) | ϕ ∧ ψ | ϕ ∨ ψ
+
+There is a canonical lattice map I → F sending i to (i = 1) and 1 − i to (i = 0). We
+write (r = 1) for the image of r : I in F and we write (r = 0) for (1 − r = 1). We have
+(r = 1) ∧ (r = 0) = 0F and we define the lattice map F → F, ψ 7−→ ψ(i/r) sending (i = 1)
+to (r = 1) and (i = 0) to (r = 0).
+Any element of F is the join of the irreducible elements below it. An irreducible element
+of this lattice is a face, i.e., a conjunction of elements of the form (i = 0) and (j = 1).
+This provides a disjunctive normal form for face formulas, and it follows from this that the
+equality on F is decidable.
+Geometrically, the face formulas describe “sub-polyhedra” of a cube. For instance, the
+element (i = 0) ∨ (j = 1) can be seen as the union of two faces of the square in directions j
+and i. If I is a finite set of names, we define the boundary of I as the element ∂I of F which
+is the disjunction of all (i = 0) ∨ (i = 1) for i in I. It is the greatest element depending at
+most on elements in I which is < 1F .
+We write Γ ⊢ ψ : F to mean that ψ is a face formula using only the names declared in
+Γ. We introduce then the new restriction operation on contexts:
+Γ, ∆ ::=
+
+. . . | Γ, ϕ
+
+together with the rule:
+Γ⊢ϕ:F
+Γ, ϕ ⊢
+This allows us to describe new geometrical shapes: as we have seen above, a type in a
+context Γ = i : I, j : I can be thought of as a square, and a type in the restricted context
+Γ, ϕ will then represent a compatible union of faces of this square. This can be illustrated
+by:
+7
+
+i : I, (i = 0) ∨ (i = 1) ⊢ A
+
+A(i0) •
+A(i0)(j1)
+
+i : I, j : I, (i = 0) ∨ (j = 1) ⊢ A
+
+A(i1) •
+A(j1)
+
+A(i1)(j1)
+
+A(i0)
+
+A(i0)(j0)
+A(i0)(j1)
+i : I, j : I, (i = 0) ∨ (i = 1) ∨ (j = 0) ⊢ A
+
+A(i1)(j1)
+
+A(i0)
+
+A(i0)(j0)
+
+A(i1)
+
+A(j0)
+
+A(i1)(j0)
+
+There is a canonical map from the lattice F to the congruence lattice of I, which is distributive [3], sending (i = 1) to the congruence identifying i with 1 (and 1 − i with 0) and sending
+(i = 0) to the congruence identifying i with 0 (and 1 − i with 1). In this way, any element
+ψ of F defines a congruence r = s (mod. ψ) on I.
+This congruence can be described as a substitution if ψ is irreducible; for instance, if
+ψ is (i = 0) ∧ (j = 1) then r = s (mod. ψ) is equivalent to r(i0)(j1) = s(i0)(j1). The
+congruence associated to ψ = ϕ0 ∨ ϕ1 is the meet of the congruences associated to ϕ0 and
+ϕ1 respectively, so that we have, e.g., i = 1 − j (mod. ψ) if ϕ0 = (i = 0) ∧ (j = 1) and
+ϕ1 = (i = 1) ∧ (j = 0).
+To any context Γ we can associate recursively a congruence on I, the congruence on
+Γ, ψ being the join of the congruence defined by Γ and the congruence defined by ψ. The
+congruence defined by () is equality in I, and an extension x : A or i : I does not change the
+congruence. The judgment Γ ⊢ r = s : I then means that r = s (mod. Γ), Γ ⊢ r : I, and
+Γ ⊢ s : I.
+In the case where Γ does not use the restriction operation, this judgment means r = s
+in I. If i is declared in Γ, then Γ, (i = 0) ⊢ r = s : I is equivalent to Γ ⊢ r(i0) = s(i0) : I.
+Similarly any context Γ defines a congruence on F with Γ, ψ ⊢ ϕ0 = ϕ1 : F being equivalent
+to Γ ⊢ ψ ∧ ϕ0 = ψ ∧ ϕ1 : F.
+As explained above, the elements of I can be seen as formal representations of elements
+in the interval [0, 1]. The elements of F can then be seen as formulas on elements of [0, 1].
+We have a simple form of quantifier elimination on F: given a name i, we define ∀i : F → F
+as the lattice morphism sending (i = 0) and (i = 1) to 0F , and being the identity on all the
+other generators. If ψ is independent of i, we have ψ ⩽ ϕ if, and only if, ψ ⩽ ∀i.ϕ. For
+example, if ϕ is (i = 0) ∨ ((i = 1) ∧ (j = 0)) ∨ (j = 1), then ∀i.ϕ is (j = 1). This operation
+will play a crucial role in Section 6.2 for the definition of composition of glueing.
+Since F is not a Boolean algebra, we don’t have in general ϕ = (ϕ∧(i = 0))∨(ϕ∧(i = 1)),
+but we always have the following decomposition:
+Lemma 2. For any element ϕ of F and any name i we have
+ϕ = (∀i.ϕ) ∨ (ϕ ∧ (i = 0)) ∨ (ϕ ∧ (i = 1))
+We also have ϕ ∧ (i = 0) ⩽ ϕ(i0) and ϕ ∧ (i = 1) ⩽ ϕ(i1).
+
+8
+
+4.2
+
+Syntax and inference rules for systems
+
+Systems allow to introduce “sub-polyhedra” as compatible unions of cubes. The extension
+to the syntax of dependent type theory with path types is:
+t, u, A, B
+
+::=
+|
+
+...
+[ ϕ1 t1 , . . . , ϕn tn ]
+
+Systems
+
+We allow n = 0 and get the empty system [ ]. As explained above, a context now corresponds
+in general to the union of sub-faces of a cube. In Figure 3 we provide operations for
+combining compatible systems of types and elements, the side condition for these rules is
+that Γ ⊢ ϕ1 ∨ · · · ∨ ϕn = 1F : F. This condition requires Γ to be sufficiently restricted: for
+example ∆, (i = 0) ∨ (i = 1) ⊢ (i = 0) ∨ (i = 1) = 1F . The first rule introduces systems
+of types, each defined on one ϕl and requiring the types to agree whenever they overlap;
+the second rule is the analogous rule for terms. The last two rules make sure that systems
+have the correct faces. The third inference rule says that that any judgment which is valid
+locally at each ϕl is valid; note that in particular n = 0 is allowed (then the side condition
+becomes Γ ⊢ 0F = 1F : F).
+Γ, ϕ1 ⊢ A1
+
+···
+
+Γ, ϕ1 ⊢ t1 : A
+
+···
+
+Γ, ϕ1 ⊢ J
+
+Γ, ϕn ⊢ An
+Γ, ϕi ∧ ϕj ⊢ Ai = Aj
+Γ ⊢ [ ϕ1 A1 , . . . , ϕn An ]
+
+(1 ⩽ i, j ⩽ n)
+
+Γ⊢A
+Γ, ϕn ⊢ tn : A
+Γ, ϕi ∧ ϕj ⊢ ti = tj : A (1 ⩽ i, j ⩽ n)
+Γ ⊢ [ ϕ1 t1 , . . . , ϕn tn ] : A
+
+· · · Γ, ϕn ⊢ J
+Γ⊢J
+
+Γ ⊢ [ ϕ1 A1 , . . . , ϕn An ]
+Γ ⊢ ϕi = 1F : F
+Γ ⊢ [ ϕ1 A1 , . . . , ϕn An ] = Ai
+
+Γ ⊢ [ ϕ1 t1 , . . . , ϕn tn ] : A
+Γ ⊢ ϕi = 1F : F
+Γ ⊢ [ ϕ1 t1 , . . . , ϕn tn ] = ti : A
+Figure 3: Inference rules for systems with side condition Γ ⊢ ϕ1 ∨ · · · ∨ ϕn = 1F : F
+Note that when n = 0 the second of the above rules should be read as: if Γ ⊢ 0F = 1F : F
+and Γ ⊢ A, then Γ ⊢ [ ] : A.
+We extend the definition of the substitution judgment by ∆ ⊢ σ : Γ, ϕ if ∆ ⊢ σ : Γ,
+Γ ⊢ ϕ : F, and ∆ ⊢ ϕσ = 1F : F.
+If Γ, ϕ ⊢ u : A, then Γ ⊢ a : A[ϕ 7→ u] is an abbreviation for Γ ⊢ a : A and Γ, ϕ ⊢ a =
+u : A. In this case, we see this element a as a witness that the partial element u, defined
+on the “extent” ϕ (using the terminology from [10]), is extensible. More generally, we write
+Γ ⊢ a : A[ϕ1 7→ u1 , . . . , ϕk 7→ uk ] for Γ ⊢ a : A and Γ, ϕl ⊢ a = ul : A for l = 1, . . . , k.
+For instance, if Γ, i : I ⊢ A and Γ, i : I, ϕ ⊢ u : A where ϕ = (i = 0) ∨ (i = 1) then the
+element u is determined by two elements Γ ⊢ a0 : A(i0) and Γ ⊢ a1 : A(i1) and an element
+Γ, i : I ⊢ a : A[(i = 0) 7→ a0 , (i = 1) 7→ a1 ] gives a path connecting a0 and a1 .
+Lemma 3. The following rules are admissible:2
+Γ, 1F ⊢ J
+========
+Γ⊢J
+
+Γ⊢ϕ⩽ψ:F
+Γ, ψ ⊢ J
+Γ, ϕ ⊢ J
+
+Γ, ϕ, ψ ⊢ J
+===========
+Γ, ϕ ∧ ψ ⊢ J
+
+2 The inference rules with double line are each a pair of rules, because they can be used in both directions.
+
+9
+
+Furthermore, if ϕ is independent of i, the following rules are admissible
+Γ, i : I, ϕ ⊢ J
+===========
+Γ, ϕ, i : I ⊢ J
+and it follows that we have in general:
+Γ, i : I, ϕ ⊢ J
+Γ, ∀i.ϕ, i : I ⊢ J
+
+4.3
+
+Composition operation
+
+The syntax of compositions is given by:
+t, u, A, B
+
+::=
+|
+
+...
+compi A [ϕ 7→ u] a0
+
+Compositions
+
+where u is a system on the extent ϕ.
+The composition operation expresses that being extensible is preserved along paths: if
+a partial path is extensible at 0, then it is extensible at 1.
+Γ⊢ϕ:F
+
+Γ, i : I ⊢ A
+
+Γ, ϕ, i : I ⊢ u : A
+
+Γ ⊢ a0 : A(i0)[ϕ 7→ u(i0)]
+
+i
+
+Γ ⊢ comp A [ϕ 7→ u] a0 : A(i1)[ϕ 7→ u(i1)]
+Note that compi binds i in A and u and that we have in particular the following equality
+judgments for systems:
+Γ ⊢ compi A [1F 7→ u] a0 = u(i1) : A(i1)
+If we have a substitution ∆ ⊢ σ : Γ, then
+(compi A [ϕ 7→ u] a0 )σ = compj A(σ, i/j) [ϕσ 7→ u(σ, i/j)] a0 σ
+where j is fresh for ∆, which corresponds semantically to the uniformity [6, 13] of the
+composition operation.
+W
+We use the abbreviation [ϕ1 7→ u1 , . . . , ϕn 7→ un ] for [ l ϕl 7→ [ϕ1 u1 , . . . , ϕn un ]] and in
+particular we write [] for [0F 7→ [ ]].
+Example 4. With composition we can justify transitivity of path types:
+Γ ⊢ p : Path A a b
+
+Γ ⊢ q : Path A b c
+
+j
+
+Γ ⊢ hii comp A [(i = 0) 7→ a, (i = 1) 7→ q j] (p i) : Path A a c
+This composition can be visualized as the dashed arrow in the square:
+a
+
+c
+j
+qj
+
+a
+
+a
+
+pi
+
+i
+
+b
+
+10
+
+4.4
+
+Kan filling operation
+
+As we have connections we also get Kan filling operations from compositions:
+Γ, i : I ⊢ filli A [ϕ 7→ u] a0 = compj A(i/i ∧ j) [ϕ 7→ u(i/i ∧ j), (i = 0) 7→ a0 ] a0 : A
+where j is fresh for Γ. The element Γ, i : I ⊢ v = filli A [ϕ 7→ u] a0 : A satisfies:
+Γ ⊢ v(i0) = a0 : A(i0)
+
+Γ ⊢ v(i1) = compi A [ϕ 7→ u] a0 : A(i1)
+
+Γ, ϕ, i : I ⊢ v = u : A
+
+This means that we can not only compute the lid of an open box but also its filling. If ϕ is
+the boundary formula on the names declared in Γ, we recover the Kan operation for cubical
+sets [16].
+
+4.5
+
+Equality judgments for composition
+
+The equality judgments for compi C [ϕ 7→ u] a0 are defined by cases on the type C which
+depends on i, i.e., Γ, i : I ⊢ C. The right hand side of the definitions are all equal to u(i1)
+on the extent ϕ by the typing rule for compositions. There are four cases to consider:
+Product types, C = (x : A) → B
+Given Γ, ϕ, i : I ⊢ µ : C and Γ ⊢ λ0 : C(i0)[ϕ 7→ µ(i0)] the composition will be of type C(i1).
+For Γ ⊢ u1 : A(i1), we first let:
+w = filli A(i/1 − i) [] u1
+
+(in context Γ, i : I and of type A(i/1 − i))
+
+v = w(i/1 − i)
+
+(in context Γ, i : I and of type A)
+
+Using this we define the equality judgment:
+Γ ⊢ (compi C [ϕ 7→ µ] λ0 ) u1 = compi B(x/v) [ϕ 7→ µ v] (λ0 v(i0)) : B(x/v)(i1)
+Sum types, C = (x : A) × B
+Given Γ, ϕ, i : I ⊢ w : C and Γ ⊢ w0 : C(i0)[ϕ 7→ w(i0)] we let:
+a = filli A [ϕ 7→ w.1] w0 .1
+
+(in context Γ, i : I and of type A)
+
+i
+
+c1 = comp A [ϕ 7→ w.1] w0 .1
+
+(in context Γ and of type A(i1))
+
+c2 = compi B(x/a) [ϕ 7→ w.2] w0 .2
+
+(in context Γ and of type B(x/a)(i1))
+
+From which we define:
+Γ ⊢ compi C [ϕ 7→ w] w0 = (c1 , c2 ) : C(i1)
+Natural numbers, C = N
+In this we define compi C [ϕ 7→ n] n0 by recursion:
+Γ ⊢ compi C [ϕ 7→ 0] 0 = 0 : C
+Γ ⊢ compi C [ϕ 7→ s n] (s n0 ) = s (compi C [ϕ 7→ n] n0 ) : C
+Path types, C = Path A u v
+Given Γ, ϕ, i : I ⊢ p : C and Γ ⊢ p0 : C(i0)[ϕ 7→ p(i0)] we define:
+Γ ⊢ compi C [ϕ 7→ p] p0 = hji compi A [ϕ 7→ p j, (j = 0) 7→ u, (j = 1) 7→ v] (p0 j) : C(i1)
+11
+
+4.6
+
+Transport
+
+Composition for ϕ = 0F corresponds to transport:
+Γ ⊢ transpi A a = compi A [] a : A(i1)
+Together with the fact that singletons are contractible, from Section 3.2, we get the
+elimination principle for Path types in the same manner as explained for identity types in
+Section 7.2 of [6].
+
+5
+
+Derived notions and operations
+
+This section defines various notions and operations that will be used for defining compositions for the glue operation in the next section. This operation will then be used to define
+the composition operation for the universe and to prove the univalence axiom.
+
+5.1
+
+Contractible types
+
+We define isContr A = (x : A) × ((y : A) → Path A x y). A proof of isContr A witnesses the
+fact that A is contractible.
+Given Γ ⊢ p : isContr A and Γ, ϕ ⊢ u : A we define the operation3
+Γ ⊢ contr p [ϕ 7→ u] = compi A [ϕ 7→ p.2 u i] p.1 : A[ϕ 7→ u]
+Conversely, we can state the following characterization of contractible types:
+Lemma 5. Let Γ ⊢ A and assume that we have one operation
+Γ, ϕ ⊢ u : A
+Γ ⊢ contr [ϕ 7→ u] : A[ϕ 7→ u]
+then we can find an element in isContr A.
+Proof. We define x = contr [] : A and prove that any element y : A is path equal to x. For
+this, we introduce a fresh name i : I and define ϕ = (i = 0) ∨ (i = 1) and u = [(i = 0) 7→
+x, (i = 1) 7→ y]. Using this we obtain Γ, i : I ⊢ v = contr [ϕ 7→ u] : A[ϕ 7→ u]. In this way,
+we get a path hii contr [ϕ 7→ u] connecting x and y.
+
+5.2
+
+The pres operation
+
+The pres operation states that the image of a composition is path equal to the composition
+of the respective images, so that any function preserves composition, up to path equality.
+Lemma 6. We have an operation:
+Γ, i : I ⊢ f : T → A
+
+Γ⊢ϕ:F
+
+Γ, ϕ, i : I ⊢ t : T
+
+Γ ⊢ t0 : T (i0)[ϕ 7→ t(i0)]
+
+Γ ⊢ presi f [ϕ 7→ t] t0 : (Path A(i1) c1 c2 )[ϕ 7→ hji (f t)(i1)]
+where c1 = compi A [ϕ 7→ f t] (f (i0) t0 ) and c2 = f (i1) (compi T [ϕ 7→ t] t0 ).
+Proof. Let Γ ⊢ a0 = f (i0) t0 : A(i0) and Γ, i : I ⊢ v = filli T [ϕ 7→ t] t0 : T . We take
+presi f [ϕ 7→ t] t0 = hji compi A [ϕ ∨ (j = 1) 7→ f v] a0 .
+Note that presi binds i in f and t.
+3 This expresses that the restriction map Γ, ϕ → Γ has the left lifting property w.r.t. any “trivial fibration”,
+i.e., contractible extensions Γ, x : A → Γ. The restriction maps Γ, ϕ → Γ thus represent “cofibrations” while
+the maps Γ, x : A → Γ represent “fibrations”.
+
+12
+
+5.3
+
+The equiv operation
+
+We define isEquiv T A f = (y : A) → isContr ((x : T ) × Path A y (f x)) and Equiv T A =
+(f : T → A) × isEquiv T A f . If f : Equiv T A and t : T , we may write f t for f .1 t.
+Lemma 7. If Γ ⊢ f : Equiv T A, we have an operation
+Γ, ϕ ⊢ t : T
+Γ⊢a:A
+Γ, ϕ ⊢ p : Path A a (f t)
+Γ ⊢ equiv f [ϕ 7→ (t, p)] a : ((x : T ) × Path A a (f x))[ϕ 7→ (t, p)]
+Conversely, if Γ ⊢ f : T → A and we have such an operation, then we can build a proof that
+f is an equivalence.
+Proof. We define equiv f [ϕ 7→ (t, p)] a = contr (f .2 a) [ϕ 7→ (t, p)] using the contr operation
+defined above. The second statement follows from Lemma 5.
+
+6
+
+Glueing
+
+In this section, we introduce the glueing operation. This operation expresses that to be
+“extensible” is invariant by equivalence. From this operation, we can define a composition
+operation for universes, and prove the univalence axiom.
+
+6.1
+
+Syntax and inference rules for glueing
+
+We introduce the glueing construction at type and term level by:
+t, u, A, B
+
+::=
+|
+|
+|
+
+...
+Glue [ϕ 7→ (T, f )] A
+glue [ϕ 7→ t] u
+unglue [ϕ 7→ f ] u
+
+Glue type
+Glue term
+Unglue term
+
+We may write simply unglue b for unglue [ϕ 7→ f ] b. The inference rules for these are
+presented in Figure 4.
+Γ⊢A
+
+Γ, ϕ ⊢ T
+Γ, ϕ ⊢ f : Equiv T A
+Γ ⊢ Glue [ϕ 7→ (T, f )] A
+
+Γ ⊢ b : Glue [ϕ 7→ (T, f )] A
+Γ ⊢ unglue b : A[ϕ 7→ f b]
+
+Γ, ϕ ⊢ f : Equiv T A
+Γ, ϕ ⊢ t : T
+Γ ⊢ a : A[ϕ 7→ f t]
+Γ ⊢ glue [ϕ 7→ t] a : Glue [ϕ 7→ (T, f )] A
+Γ⊢T
+Γ ⊢ f : Equiv T A
+Γ ⊢ Glue [1F 7→ (T, f )] A = T
+
+Γ⊢t:T
+Γ ⊢ f : Equiv T A
+Γ ⊢ glue [1F 7→ t] (f t) = t : T
+
+Γ ⊢ b : Glue [ϕ 7→ (T, f )] A
+Γ ⊢ b = glue [ϕ 7→ b] (unglue b) : Glue [ϕ 7→ (T, f )] A
+Γ, ϕ ⊢ f : Equiv T A
+Γ, ϕ ⊢ t : T
+Γ ⊢ a : A[ϕ 7→ f t]
+Γ ⊢ unglue (glue [ϕ 7→ t] a) = a : A
+Figure 4: Inference rules for glueing
+It follows from these rules that if Γ ⊢ b : Glue [ϕ 7→ (T, f )] A, then Γ, ϕ ⊢ b : T .
+13
+
+In the case ϕ = (i = 0) ∨ (i = 1) the glueing operation can be illustrated as the dashed
+line in:
+T0
+
+∼
+
+∼
+
+f (i0)
+
+T1
+
+A(i0)
+
+A
+
+f (i1)
+
+A(i1)
+
+This illustrates why the operation is called glue: it glues together along a partial equivalence
+the partial type T and the total type A to a total type that extends T .
+Remark. In general Glue [ϕ 7→ (T, f )] A can be illustrated as:
+Glue [ϕ 7→ (T, f )] A
+
+T
+
+ung
+
+f
+∼
+
+l ue
+
+A
+
+A
+
+Γ, ϕ
+
+Γ
+
+This diagram suggests that a construction similar to Glue also appears in the simplicial set
+model. Indeed, the proof of Theorem 3.4.1 in [17] contains a similar diagram where E 1
+corresponds to Glue [ϕ 7→ (T, f )] A.
+Example 8. Using glueing we can construct a path from an equivalence Γ ⊢ f : Equiv A B
+by defining
+Γ, i : I ⊢ E = Glue [(i = 0) 7→ (A, f ), (i = 1) 7→ (B, idB )] B
+so that E(i0) = A and E(i1) = B, where idB : Equiv B B is defined as:
+idB = (λx : B. x, λx : B. ((x, 1x ), λu : (y : B) × Path B x y. hii (u.2 i, hji u.2 (i ∧ j))))
+In Section 7 we introduce a universe of types U and we will be able to define a function of
+type (A B : U) → Equiv A B → Path U A B by:
+λA B : U. λf : Equiv A B. hii Glue [(i = 0) 7→ (A, f ), (i = 1) 7→ (B, idB )] B
+
+6.2
+
+Composition for glueing
+
+We assume Γ, i : I ⊢ B = Glue [ϕ 7→ (T, f )] A, and define the composition in B. In order to
+do so, assume
+Γ, ψ, i : I ⊢ b : B
+
+Γ ⊢ b0 : B(i0)[ψ 7→ b(i0)]
+
+and define:
+a = unglue b
+a0 = unglue b0
+
+(in context Γ, ψ, i : I and of type A[ϕ 7→ f b])
+(in context Γ and of type A(i0)[ϕ(i0) 7→ f (i0) b0 , ψ 7→ a(i0)])
+
+14
+
+The following provides the algorithm for composition compi B [ψ 7→ b] b0 = b1 of type
+B(i1)[ψ 7→ b(i1)].
+δ
+a′1
+t′1
+ω
+(t1 , α)
+a1
+b1
+
+=
+=
+=
+=
+=
+=
+=
+
+∀i.ϕ
+compi A [ψ 7→ a] a0
+compi T [ψ 7→ b] b0
+presi f [ψ 7→ b] b0
+equiv f (i1) [δ 7→ (t′1 , ω), ψ 7→ (b(i1), hjia′1 )] a′1
+compj A(i1) [ϕ(i1) 7→ α j, ψ 7→ a(i1)] a′1
+glue [ϕ(i1) 7→ t1 ] a1
+
+Γ
+Γ
+Γ, δ
+Γ, δ
+Γ, ϕ(i1)
+Γ
+Γ
+
+We can check that whenever Γ, i : I ⊢ ϕ = 1F : F the definition of b1 coincides with
+compi T [ψ 7→ b] b0 , which is consistent with the fact that B = T in this case.
+In the next section we will use the glue operation to define the composition for the
+universe and to prove the univalence axiom.
+
+7
+
+Universe and the univalence axiom
+
+As in [20], we now introduce a universe U à la Russell by reflecting all typing rules and
+Γ⊢
+Γ⊢U
+
+Γ⊢A:U
+Γ⊢A
+
+In particular, we have Γ ⊢ Glue [ϕ 7→ (T, f )] A : U whenever Γ ⊢ A : U, Γ, ϕ ⊢ T : U, and
+Γ, ϕ ⊢ f : Equiv T A.
+
+7.1
+
+Composition for the universe
+
+In order to describe the composition operation for the universe we first have to explain how
+to construct an equivalence from a line in the universe. Given Γ ⊢ A, Γ ⊢ B, and Γ, i : I ⊢ E,
+such that E(i0) = A and E(i1) = B, we will construct equivi E : Equiv A B. In order to do
+this we first define
+f = λx : A. transpi E x
+
+(in context Γ and of type A → B)
+
+i
+
+g = λy : B. (transp E(i/1 − i) y)(i/1 − i)
+i
+
+u = λx : A. fill E [] x
+
+(in context Γ and of type B → A)
+(in context Γ, i : I and of type A → E)
+
+i
+
+v = λy : B. (fill E(i/1 − i) [] y)(i/1 − i)
+
+(in context Γ, i : I and of type B → E)
+
+such that:
+u(i0) = λx : A.x
+
+u(i1) = f
+
+v(i0) = g
+
+v(i1) = λy : B.y
+
+We will now prove that f is an equivalence. Given y : B we see that (x : A) ×
+Path B y (f x) is inhabited as it contains the element (g y, hji θ0 (i1)) where
+θ0 = filli E [(j = 0) 7→ v y, (j = 1) 7→ u (g y)] (g y).
+Next, given an element (x, β) of (x : A) × Path B y (f x) we will construct a path from
+(g y, hji θ0 (i1)) to (x, β). Let
+
+θ1 = filli E(i/1 − i) [(j = 0) 7→ (v y)(i/1 − i), (j = 1) 7→ (u x)(i/1 − i)] (β j) (i/1 − i)
+15
+
+and ω = θ1 (i0) so Γ, i : I, j : I ⊢ θ1 : E, ω(j0) = g y, and ω(j1) = x. And further with
+δ = compi E [(k = 0) 7→ θ0 , (k = 1) 7→ θ1 , (j = 0) 7→ v y, (j = 1) 7→ u ω(j/k)] ω(j/j ∧ k)
+we obtain
+hki (ω(j/k), hji δ) : Path ((x : A) × Path B y (f x)) (g y, hji θ0 (i1)) (x, β)
+as desired. This concludes the proof that f is an equivalence and thus also the construction
+of equivi E : Equiv A B.
+Using this we can now define the composition for the universe:
+Γ ⊢ compi U [ϕ 7→ E] A0 = Glue [ϕ 7→ (E(i1), equivi E(i/1 − i))] A0 : U
+Remark. Given Γ, i : I ⊢ E we can also get an equivalence in Equiv A B (where A = E(i0)
+and B = E(i1)) with a less direct description by
+Γ ⊢ transpi (Equiv A E) idA : Equiv A B
+where idA is the identity equivalence as given in Example 8.
+
+7.2
+
+The univalence axiom
+
+Given B = Glue [ϕ 7→ (T, f )] A the map unglue : B → A extends f , in the sense that
+Γ, ϕ ⊢ unglue b = f b : A if Γ ⊢ b : B.
+Theorem 9. The map unglue : B → A is an equivalence.
+Proof. By Lemma 7 it suffices to construct
+b̃ : B[ψ 7→ b]
+
+α̃ : Path A u (unglue b̃)[ψ 7→ α]
+
+given Γ, ψ ⊢ b : B and Γ ⊢ u : A and Γ, ψ ⊢ α : Path A u (unglue b).
+Since Γ, ϕ ⊢ f : T → A is an equivalence and
+Γ, ϕ, ψ ⊢ b : T
+
+Γ, ϕ, ψ ⊢ α : Path A u (f b)
+
+we get, using Lemma 7
+Γ, ϕ ⊢ t : T [ψ 7→ b]
+
+Γ, ϕ ⊢ β : Path A u (f t) [ψ 7→ α]
+
+We then define ã = compi A [ϕ 7→ β i, ψ 7→ α i] u, and using this we conclude by letting
+b̃ = glue [ϕ 7→ t] ã and α̃ = filli A [ϕ 7→ β i, ψ 7→ α i] u.
+Corollary 10. For any type A : U the type C = (X : U) × Equiv X A is contractible.4
+Proof. It is enough by Lemma 5 to show that any partial element ϕ ⊢ (T, f ) : C is path
+equal to the restriction of a total element. The map unglue extends f and is an equivalence
+by the previous theorem. Since any two elements of the type isEquiv X A f .1 are path
+equal, this shows that any partial element of type C is path equal to the restriction of a
+total element. We can then conclude by Theorem 9.
+Corollary 11 (Univalence axiom). For any term
+t : (A B : U) → Path U A B → Equiv A B
+the map t A B : Path U A B → Equiv A B is an equivalence.
+Proof. Both (X : U) × Path U A X and (X : U) × Equiv A X are contractible. Hence the
+result follows from Theorem 4.7.7 in [26].
+Two alternative proofs of univalence can be found in Appendix B.
+4 This formulation of the univalence axiom can be found in the message of Martı́n Escardó in:
+
+https://groups.google.com/forum/#!msg/homotopytypetheory/HfCB_b-PNEU/Ibb48LvUMeUJ
+This is also used in the (classical) proofs of the univalence axiom, see Theorem 3.4.1 of [17] and Proposition 2.18 of [8], where an operation similar to the glueing operation appears implicitly.
+
+16
+
+8
+
+Semantics
+
+In this section we will explain the semantics of the type theory under consideration in cubical
+sets. We will first review how cubical sets, as a presheaf category, yield a model of basic type
+theory, and then explain the additional so-called composition structure we have to require
+to interpret the full cubical type theory.
+
+8.1
+
+The category of cubes and cubical sets
+
+Consider the monad dM on the category of sets associating to each set the free de Morgan
+algebra on that set. The category of cubes C is the small category whose objects are finite
+subsets I, J, K, . . . of a fixed, discrete, and countably infinite set, called names, and a
+morphism Hom(J, I) is a map I → dM(J). Identities and compositions are inherited from
+the Kleisli category of dM, i.e., the identity on I is given by the unit I → dM(I), and
+composition f g ∈ Hom(K, I) of g ∈ Hom(K, J) and f ∈ Hom(J, I) is given by µK ◦dM(g)◦f
+where µK : dM(dM(K)) → dM(K) denotes multiplication of dM. We will use f, g, h for
+morphisms in C and simply write f : J → I for f ∈ Hom(J, I). We will often write unions
+with commas and omit curly braces around finite sets of names, e.g., writing I, i, j for
+I ∪ {i, j} and I − i for I − {i} etc.
+If i is in I and b is 0I or 1I , we have maps (ib) in Hom(I − i, I) whose underlying map
+sends j 6= i to itself and i to b. A face map is a composition of such maps. A strict map
+Hom(J, I) is a map I → dM(J) which never takes the value 0I or 1I . Any f can be uniquely
+written as a composition f = gh where g is a face map and h is strict.
+Definition 12. A cubical set is a presheaf on C.
+Thus, a cubical set Γ is given by sets Γ(I) for each I ∈ C and maps (called restrictions)
+Γ(f ) : Γ(I) → Γ(J) for each f : J → I. If we write Γ(f )(ρ) = ρf for ρ ∈ Γ(I) (leaving
+the Γ implicit), these maps should satisfy ρ idI = ρ and (ρf )g = ρ(f g) for f : J → I and
+g : K → J.
+Let us discuss some important examples of cubical sets. Using the canonical de Morgan
+algebra structure of the unit interval, [0, 1], we can define a functor
+C → Top,
+
+I 7→ [0, 1]I .
+
+(1)
+
+If u is in [0, 1]I we can think of u as an environment giving values in [0, 1] to each i ∈ I, so
+that iu is in [0, 1] if i ∈ I. Since [0, 1] is a de Morgan algebra, this extends uniquely to ru
+for r ∈ dM(I). So any f : J → I in C induces f : [0, 1]J → [0, 1]I by i(f u) = (if )u.
+To any topological space X we can associate its singular cubical set S(X) by taking
+S(X)(I) to be the set of continuous functions [0, 1]I → X.
+For a finite set of names I we get the formal cube y I where y : C → [C op , Set] denotes
+the Yoneda embedding. Note that since Top is cocomplete the functor in (1) extends to a
+cocontinuous functor assigning to each cubical set its geometric realization as a topological
+space, in such a way that y I has [0, 1]I as its geometric realization.
+The formal interval I induces a cubical set given by I(I) = dM(I). The face lattice F
+induces a cubical set by taking as F(I) to be those ϕ ∈ F which only use symbols in I.
+The restrictions along f : J → I are in both cases simply substituting the symbols i ∈ I by
+f (i) ∈ dM(J).
+As any presheaf category, cubical sets have a subobject classifier Ω where Ω(I) is the set
+of sieves on I (i.e., subfunctors of y I). Consider the natural transformation (· = 1) : I → Ω
+where for r ∈ I(I), (r = 1) is the sieve on I of all f : J → I such that rf = 1I . The image
+of (· = 1) is F → Ω, assigning to each ϕ the sieve of all f with ϕf = 1F .
+
+17
+
+8.2
+
+Presheaf semantics
+
+The category of cubical sets (with morphisms being natural transformations) induce—as
+does any presheaf category—a category with families (CwF) [9] where the category of contexts and substitutions is the category of cubical sets. We will review the basic constructions
+but omit verification of the required equations (see, e.g., [12, 13, 6] for more details).
+Basic presheaf semantics
+As already mentioned the category of (semantic) contexts and substitutions is given by
+cubical sets and their maps. In this section we will use Γ, ∆ to denote cubical sets and
+(semantic) substitutions by σ : ∆ → Γ, overloading previous use of the corresponding metavariables to emphasize their intended role.
+Given a cubical set Γ, the types A in context Γ, written A ∈ Ty(Γ), are given by sets
+Aρ for each I ∈ C and ρ ∈ Γ(I) together with restriction maps Aρ → A(ρf ), u 7→ uf for
+f : J → I satisfying u idI = u and (uf )g = u(f g) ∈ A(ρf g) if g : K → J. Equivalently,
+A ∈ Ty(Γ) are the presheaves on the category of elements of Γ. For a type A ∈ Ty(Γ) its
+terms a ∈ Ter(Γ; A) are given by families of elements aρ ∈ Aρ for each I ∈ C and ρ ∈ Γ(I)
+such that (aρ)f = a(ρf ) for f : J → I. Note that our notation leaves a lot implicit; e.g.,
+we should have written A(I, ρ) for Aρ; A(I, ρ, f ) for the restriction map Aρ → A(ρf ); and
+a(I, ρ) for aρ.
+For A ∈ Ty(Γ) and σ : ∆ → Γ we define Aσ ∈ Ty(∆) by (Aσ)ρ = A(σρ) and the induced
+restrictions. If we also have a ∈ Ter(Γ; A), we define aσ ∈ Ter(∆; Aσ) by (aσ)ρ = a(σρ). For
+a type A ∈ Ty(Γ) we define the cubical set Γ.A by (Γ.A)(I) being the set of all (ρ, u) with
+ρ ∈ Γ(I) and u ∈ Aρ; restrictions are given by (ρ, u)f = (ρf, uf ). The first projection yields
+a map p : Γ.A → Γ and the second projection a term q ∈ Ter(Γ.A; Ap). Given σ : ∆ → Γ,
+A ∈ Ty(Γ), and a ∈ Ter(∆; Aσ) we define (σ, a) : ∆ → Γ.A by (σ, a)ρ = (σρ, aρ). For
+u ∈ Ter(Γ; A) we define [u] = (idΓ , u) : Γ → Γ.A.
+The basic type formers are interpreted as follows. For A ∈ Ty(Γ) and B ∈ Ty(Γ.A)
+define ΣΓ (A, B) ∈ Ty(Γ) by letting ΣΓ (A, B)ρ contain all pairs (u, v) where u ∈ Aρ and
+v ∈ B(ρ, v); restrictions are defined as (u, v)f = (uf, vf ). Given w ∈ Ter(Γ; Σ(A, B)) we
+get w.1 ∈ Ter(Γ; A) and w.2 ∈ Ter(Γ; B[w.1]) by (w.1)ρ = p(wρ) and (w.2)ρ = q(wρ) where
+p(u, v) = u and q(u, v) = v are the set-theoretic projections.
+Given A ∈ Ty(Γ) and B ∈ Ty(Γ.A) the dependent function space ΠΓ (A, B) ∈ Ty(Γ) is
+defined by letting ΠΓ (A, B)ρ for ρ ∈ Γ(I) contain all families w = (wf | J ∈ C, f : J → I)
+where
+Y
+B(ρf, u) such that (wf u)g = wf g (ug) for u ∈ A(ρf ), g : K → J.
+wf ∈
+u∈A(ρf )
+
+The restriction by f : J → I of such a w is defined by (wf )g = wf g . Given v ∈ Ter(Γ.A; B)
+we have λΓ;A v ∈ Ter(Γ; Π(A, B)) given by ((λv)ρ)f u = v(ρf, u). Application app(w, u) ∈
+Ter(Γ; B[u]) of w ∈ Ter(Γ; Π(A, B)) to u ∈ Ter(Γ; A) is defined by
+app(w, u)ρ = (wρ)idI (uρ) ∈ (B[u])ρ.
+
+(2)
+
+Basic data types like the natural numbers can be interpreted as discrete presheaves, i.e.,
+N ∈ Ty(Γ) is given by Nρ = N; the constants are interpreted by the lifts of the corresponding
+set-theoretic operations on N. This concludes the outline of the basic CwF structure on
+cubical sets.
+Remark. Following Aczel [1] we will make use of that our semantic entities are actual sets
+in the ambient set theory. This will allow us to interpret syntax in Section 8.3 with fewer
+type annotations than are usually needed for general categorical semantics of type theory
+(see [24]). E.g., the definition of application app(w, u)ρ as defined in (2) is independent of
+18
+
+Γ, A and B, since set-theoretic application is a (class) operation on all sets. Likewise, we
+don’t need annotations for first and second projections. But note that we will need the type
+A for λ-abstraction for (λΓ;A v)ρ to be a set by the replacement axiom.
+Semantic path types
+Note that we can consider any cubical set X as X ′ ∈ Ty(Γ) by setting X ′ ρ = X(I) for
+ρ ∈ Γ(I). We will usually simply write X for X ′ . In particular, for a cubical set Γ we can
+form the cubical set Γ.I.
+For A ∈ Ty(Γ) and u, v ∈ Ter(Γ; A) the semantic path type PathΓA (u, v) ∈ Ty(Γ) is given
+by: for ρ ∈ Γ(I), PathA (u, v)ρ consists of equivalence classes hii w where i ∈
+/ I, w ∈ A(ρsi )
+such that w(i0) = uρ and w(i1) = vρ; two such elements hii w and hji w′ are equal iff
+w(i/j) = w′ . Here si : I, i → I is induced by the inclusion I ⊆ I, i and (i/j) setting i
+to j. We define (hii w)f = hji w(f, i/j) for f : J → I and j ∈
+/ J. For r ∈ I(I) we set
+(hii w) r = w(i/r). Both operations, name abstraction and application, lift to terms, i.e.,
+if w ∈ Ter(Γ.I; A), then h iw ∈ Ter(Γ; PathA (w[0], w[1])) given by (h iw)ρ = hii w(ρsi ) for
+a fresh i; also if u ∈ Ter(Γ; PathA (a, b)) and r ∈ Ter(Γ; I), then u r ∈ Ter(Γ; A) defined as
+(u r)ρ = (uρ) (rρ).
+Composition structure
+For ϕ ∈ Ter(Γ; F) we define the cubical set Γ, ϕ by taking ρ ∈ (Γ, ϕ)(I) iff ρ ∈ Γ(I) and
+ϕρ = 1F ∈ F; the restrictions are those induced by Γ. In particular, we have Γ, 1 = Γ and
+Γ, 0 is the empty cubical set. (Here, 0 ∈ Ter(Γ; F) is 0ρ = 0F and similarly for 1F .) Any
+σ : ∆ → Γ gives rise to a morphism ∆, ϕσ → Γ, ϕ which we also will denote by σ.
+If A ∈ Ty(Γ) and ϕ ∈ Ter(Γ; F), we define a partial element of A ∈ Ty(Γ) of extent ϕ
+to be an element of Ter(Γ, ϕ; Aιϕ ) where ιϕ : Γ, ϕ ֒→ Γ is the inclusion. So, such a partial
+element u is given by a family of elements uρ ∈ Aρ for each ρ ∈ Γ(I) such that ϕρ = 1,
+satisfying (uρ)f = u(ρf ) whenever f : J → I. Each u ∈ Ter(Γ; A) gives rise to the partial
+element uι ∈ Ter(Γ, ϕ; Aι); a partial element is extensible if it is induced by such an element
+of Ter(Γ; A).
+For the next definition note that if A ∈ Ty(Γ), then ρ ∈ Γ(I) corresponds to ρ : y I → Γ
+and thus Aρ ∈ Ty(y I); also, any ϕ ∈ F(I) corresponds to ϕ ∈ Ter(y I; F).
+Definition 13. A composition structure for A ∈ Ty(Γ) is given by the following operations.
+For each I, i ∈
+/ I, ρ ∈ Γ(I, i), ϕ ∈ F(I), u a partial element of Aρ of extent ϕ, and a0 ∈ Aρ(i0)
+with a0 f = u(i0)f for all f : J → I with ϕf = 1F (i.e., a0 ιϕ = u(i0) if a0 is considered as
+element of Ter(y I; Aρ(i0))), we require
+comp(I, i, ρ, ϕ, u, a0 ) ∈ Aρ(i1)
+such that for any f : J → I and j ∈
+/ J,
+(comp(I, i, ρ, ϕ, u, a0 ))f = comp(J, j, ρ(f, i = j), ϕf, u(f, i = j), a0 f ),
+and comp(I, i, ρ, 1F , u, a0 ) = u(i1) .
+A type A ∈ Ty(Γ) together with a composition structure comp on A is called a fibrant
+type, written (A, comp) ∈ FTy(Γ). We will usually simply write A ∈ FTy(Γ) and compA
+for its composition structure. But observe that A ∈ Ty(Γ) can have different composition
+structures. Call a cubical set Γ fibrant if it is a fibrant type when Γ considered as type
+Γ ∈ Ty(⊤) is fibrant where ⊤ is a terminal cubical set. A prime example of a fibrant cubical
+set is the singular cubical set of a topological space (see Appendix C).
+Theorem 14. The CwF on cubical sets supporting dependent products, dependent sums,
+and natural numbers described above can be extended to fibrant types.
+19
+
+Proof. For example, if A ∈ FTy(Γ) and σ : ∆ → Γ, we set
+compAσ (I, i, ρ, ϕ, u, a0 ) = compA (I, i, σρ, ϕ, u, a0 )
+as the composition structure on Aσ in FTy(∆). Type formers are treated analogously to
+their syntactic counterpart given in Section 4. Note that one also has to check that all
+equations between types are also preserved by their associated composition structures.
+Note that we can also, like in the syntax, define a composition structure on PathA (u, v)
+given that A has one.
+Semantic glueing
+Next we will give a semantic counterpart to the Glue construction. To define the semantic glueing as an element of Ty(Γ) it is not necessary that the given types have composition structures or that the functions are equivalences; this is only needed later to
+give the composition structure. Assume ϕ ∈ Ter(Γ; F), T ∈ Ty(Γ, ϕ), A ∈ Ty(Γ), and
+w ∈ Ter(Γ, ϕ; T → Aι) (where A → B is Π(A, Bp)).
+Definition 15. The semantic glueing GlueΓ (ϕ, T, A, w) ∈ Ty(Γ) is defined as follows. For
+ρ ∈ Γ(I), we let u ∈ Glue(ϕ, T, A, w)ρ iff either
+• u ∈ T ρ and ϕρ = 1F ; or
+• u = glue(ϕρ, t, a) and ϕρ 6= 1F , where t ∈ Ter(y I, ϕρ; T ρ) and a ∈ Ter(y I; Aρ) such
+that app(wρ, t) = aι ∈ Ter(y I, ϕρ; Aρι).
+For f : J → I we define the restriction uf of u ∈ Glue(ϕ, T, A, w) to be given by the restriction of T ρ in the first case; in the second case, i.e., if ϕρ 6= 1F , we let uf = glue(ϕρ, t, a)f =
+tf ∈ T ρf in case ϕρf = 1F , and otherwise uf = glue(ϕρf, tf, af ).
+Here glue was defined as a constructor; we extend glue to any t ∈ Ter(y I; T ρ), a ∈
+Ter(y I; Aρ) such that app(wρ, t) = a (so if ϕρ = 1F ) by glue(1F , t, a) = tidI . This way any
+element of Glue(ϕ, T, A, w)ρ is of the form glue(ϕρ, t, a) for suitable t and a, and restriction
+is given by (glue(ϕρ, t, a))f = glue(ϕρf, tf, af ). Note that we get
+GlueΓ (1F , T, A, w) = T and (GlueΓ (ϕ, T, A, w))σ = Glue∆ (ϕσ, T σ, Aσ, wσ)
+
+(3)
+
+for σ : ∆ → Γ. We define unglue(ϕ, w) ∈ Ter(Γ. Glue(ϕ, T, A, w); Ap) by
+unglue(ϕ, w)(ρ, t) = app(wρ, t)idI ∈ Aρ
+unglue(ϕ, w)(ρ, glue(ϕ, t, a)) = a
+
+whenever ϕρ = 1F , and
+otherwise,
+
+where ρ ∈ Γ(I).
+Definition 16. For A, B ∈ Ty(Γ) and w ∈ Ter(Γ; A → B) an equivalence structure for w
+is given by the following operations such that for each
+• ρ ∈ Γ(I),
+• ϕ ∈ F(I),
+• b ∈ Bρ, and
+• partial elements a of Aρ and ω of PathB (app(wρ, a), bι)ρ with extent ϕ,
+
+20
+
+we are given
+e0 (ρ, ϕ, b, a, ω) ∈ Aρ, and a path e1 (ρ, ϕ, b, a, ω) between app(wρ, e0 (ρ, ϕ, b, a, ω)) and b
+such that e0 (ρ, ϕ, b, a, ω)ι = a, e1 (ρ, ϕ, b, a, ω)ι = ω (where ι : y I, ϕ → y I) and for any
+f : J → I and ν = 0, 1:
+(eν (ρ, ϕ, b, a, ω))f = eν (ρf, ϕf, bf, af, ωf ).
+Following the argument in the syntax we can use the equivalence structure to explain a
+composition for Glue.
+Theorem 17. If A ∈ FTy(Γ), T ∈ FTy(Γ, ϕ), and we have an equivalence structure for w,
+then we have a composition structure for Glue(ϕ, T, A, w) such that the equations (3) also
+hold for the respective composition structures.
+Semantic universes
+Assuming a Grothendieck universe of small sets in our ambient set theory, we can define
+A ∈ Ty0 (Γ) iff all Aρ are small for ρ ∈ Γ(I); and A ∈ FTy0 (Γ) iff A ∈ Ty0 (Γ) when
+forgetting the composition structure of A.
+Definition 18. The semantic universe U is the cubical set defined by U(I) = FTy0 (y I);
+restriction along f : J → I is simply substitution along y f .
+We can consider U as an element of Ty(Γ). As such we can, as in the syntactic counterpart, define a composition structure on U using semantic glueing, so that U ∈ FTy(Γ). Note
+that semantic glueing preserves smallness.
+For T ∈ Ter(Γ; U) we can define decoding El T ∈ FTy0 (Γ) by (El T )ρ = (T ρ) idI and
+likewise for the composition structure. For A ∈ FTy0 (Γ) we get its code pAq ∈ Ter(Γ; U)
+by setting pAqρ ∈ FTy0 (y I) to be given by the sets (pAqρ)f = A(ρf ) and likewise for
+restrictions and composition structure. These operations satisfy ElpAq = A and pEl T q = T .
+
+8.3
+
+Interpretation of the syntax
+
+Following [24] we define a partial interpretation function from raw syntax to the CwF with
+fibrant types given in the previous section.
+To interpret the universe rules à la Russell we assume two Grothendieck universes in
+the underlying set theory, say tiny and small sets. So that any tiny set is small, and
+the set of tiny sets is small. For a cubical set X we define FTy0 (X) and FTy1 (X) as in
+the previous section, now referring to tiny and small sets, respectively. We get semantic
+universes Ui (I) = FTyi (y I) for i = 0, 1; we identify those with their lifts to types. As noted
+above, these lifts carry a composition structure, and thus are fibrant. We also have U0 ⊆ U1
+and thus Ter(X; U0 ) ⊆ Ter(X; U1 ). Note that coding and decoding are, as set-theoretic
+operations, the same for both universes. We get that pU0 q ∈ Ter(X; U1 ) which will serve as
+the interpretation of U.
+In what follows, we define a partial interpretation function of raw syntax: [[Γ]], [[Γ; t]], and
+[[∆; σ]] by recursion on the raw syntax. Since we want to interpret a universe à la Russell we
+cannot assume terms and types to have different syntactic categories. The definition is given
+below and should be read such that the interpretation is defined whenever all interpretations
+on the right-hand sides are defined and make sense; so, e.g., for [[Γ]]. El [[Γ; A]] below, we
+require that [[Γ]] is defined and a cubical set, [[Γ; A]] is defined, and El [[Γ; A]] ∈ FTy([[Γ]]).
+The interpretation for raw contexts is given by:
+[[()]] = ⊤
+[[Γ, ϕ]] = [[Γ]], [[Γ; ϕ]]
+
+[[Γ, x : A]] = [[Γ]].El [[Γ; A]]
+[[Γ, i : I]] = [[Γ]].I
+21
+
+if x ∈
+/ dom(Γ)
+if i ∈
+/ dom(Γ)
+
+where ⊤ is a terminal cubical set and in the last equation I is considered as an element of
+Ty([[Γ]]). When defining [[Γ; t]] we require that [[Γ]] is defined and a cubical set; then [[Γ; t]]
+is a (partial) family of sets [[Γ; t]](I, ρ) for I ∈ C and ρ ∈ [[Γ]](I) (leaving I implicit in the
+definition). We define:
+[[Γ; U]] = pU0 q ∈ Ter([[Γ]]; U1 )
+[[Γ; N]] = pNq ∈ Ter([[Γ]]; U0 )
+[[Γ; (x : A) → B]] = pΠ[[Γ]] (El [[Γ; A]], El [[Γ, x : A; B]])q
+[[Γ; (x : A) × B]] = pΣ[[Γ]](El [[Γ; A]], El [[Γ, x : A; B]])q
+[[Γ]]
+
+[[Γ; Path A a b]] = pPathEl [[Γ;A]] ([[Γ; a]], [[Γ; b]])q
+[[Γ; Glue [ϕ 7→ (T, f )] A]] = pGlue[[Γ]] ([[Γ; ϕ]], El [[Γ, ϕ; T ]], El [[Γ; A]], [[Γ, ϕ; f ]])q
+[[Γ; λx : A.t]] = λ[[Γ]];El [[Γ;A]] ([[Γ, x : A; t]])
+[[Γ; t u]] = app([[Γ; t]], [[Γ; u]])
+[[Γ; hii t]] = h i[[Γ]] [[Γ, i : I; t]]
+[[Γ; t r]] = [[Γ; t]][[Γ; r]]
+where for path application, juxtaposition on the right-hand side is semantic path application.
+In the case of a bound variable, we assume that x (respectively i) is a chosen variable fresh
+for Γ; if this is not possible the expression is undefined. Moreover, all type formers should
+be read as those on fibrant types, i.e., also defining the composition structure. In the
+case of Glue, it is understood that the function part, i.e., the fourth argument of Glue in
+Definition 15 is p ◦ [[Γ, ϕ; f ]] and the required (by Theorem 17) equivalence structure is to
+be extracted from q ◦ [[Γ, ϕ; f ]] as in Section 5.3. In virtue of the remark in Section 8.2 we
+don’t need type annotations to interpret applications. Note that coding and decoding tacitly
+refer to [[Γ]] as well. For the rest of the raw terms we also assume we are given ρ ∈ [[Γ]](I).
+Variables are interpreted by:
+[[Γ, x : A; x]]ρ = q(ρ)
+
+[[Γ, x : A; y]]ρ = [[Γ; y]](p(ρ))
+
+[[Γ, ϕ; y]]ρ = [[Γ; y]]ρ
+
+These should also be read to include the case when x or y are name variables; if x is a name
+variable, we require A to be I. The interpretations of [[Γ; r]]ρ where r is not a name and
+[[Γ; ϕ]]ρ follow inductively as elements of I and F, respectively.
+Constants for dependent sums are interpreted by:
+[[Γ; (t, u)]]ρ = ([[Γ; t]]ρ, [[Γ; u]]ρ)
+
+[[Γ; t.1]]ρ = p([[Γ; t]]ρ)
+
+[[Γ; t.2]]ρ = q([[Γ; t]]ρ)
+
+Likewise, constants for N will be interpreted by their semantic analogues (omitted). The
+interpretations for the constants related to glueing are
+[[Γ; glue [ϕ 7→ t] u]]ρ = glue([[Γ; ϕ]]ρ, [[Γ, ϕ; t]]ρ̂, [[Γ; u]]ρ)
+[[Γ; unglue [ϕ 7→ f ] u]]ρ = unglue([[Γ; ϕ]], p ◦ [[Γ; f ]])(ρ, [[Γ; u]]ρ)
+where [[Γ, ϕ; t]]ρ̂ is the family assigning [[Γ, ϕ; t]](ρf ) to J ∈ C and f : J → I (and ρf refers
+to the restriction given by [[Γ]] which is assumed to be a cubical set). Partial elements are
+interpreted by
+[[Γ; [ ϕ1 u1 , . . . , ϕn un ]]]ρ = [[Γ, ϕi ; ui ]]ρ
+
+if [[Γ; ϕi ]]ρ = 1F ,
+
+where for this to be defined we additionally assume that all [[Γ, ϕi ; ui ]] are defined and
+[[Γ, ϕi ; ui ]]ρ′ = [[Γ, ϕj ; uj ]]ρ′ for each ρ′ ∈ [[Γ]](I) with [[Γ; ϕi ∧ ϕj ]]ρ′ = 1F .
+Finally, the interpretation of composition is given by
+[[Γ; compi A [ϕ 7→ u] a0 ]]ρ = compEl [[Γ,i:I;A]](I, j, ρ′ , [[Γ; ϕ]]ρ, [[Γ, ϕ, i : I; u]]ρ′ , [[Γ; a0 ]]ρ)
+22
+
+if i ∈
+/ dom(Γ), and where j is fresh and ρ′ = (ρsj , i = j) with sj : I, j → I induced from the
+inclusion I ⊆ I, j.
+The interpretation of raw substitutions [[∆; σ]] is a (partial) family of sets [[∆; σ]](I, ρ) for
+I ∈ C and ρ ∈ [[∆]](I). We set
+[[∆; ()]]ρ = ∗,
+
+[[∆; (σ, x/t)]]ρ = ([[∆; σ]]ρ, [[∆; t]]ρ)
+
+if x ∈
+/ dom(σ),
+
+where ∗ is the unique element of ⊤(I). This concludes the definition of the interpretation
+of syntax.
+In the following α stands for either a raw term or raw substitution. In the latter case,
+ασ denotes composition of substitutions.
+Lemma 19. Let Γ′ be like Γ but with some ϕ’s inserted, and assume both [[Γ]] and [[Γ′ ]] are
+defined; then:
+1. [[Γ′ ]] is a sub-cubical set of [[Γ]];
+2. if [[Γ; α]] is defined, then so is [[Γ′ ; α]] and they agree on [[Γ′ ]].
+Lemma 20 (Weakening). Let [[Γ]] be defined.
+1. If [[Γ, x : A, ∆]] is defined, then so is [[Γ, x : A, ∆; x]] which is moreover the projection
+to the x-part.5
+2. If [[Γ, ∆]] is defined, then so is [[Γ, ∆; idΓ ]] which is moreover the projection to the
+Γ-part.
+3. If [[Γ, ∆]], [[Γ; α]] are defined and the variables in ∆ are fresh for α, then [[Γ, ∆; α]] is
+defined and for ρ ∈ [[Γ, ∆]](I):
+[[Γ; α]]([[Γ, ∆; idΓ ]]ρ) = [[Γ, ∆; α]]ρ
+Lemma 21 (Substitution). For [[Γ]],[[∆]], [[∆; σ]], and [[Γ; α]] defined with dom(Γ) = dom(σ)
+(as lists), also [[∆; ασ]] is defined and for ρ ∈ [[∆]](I):
+[[Γ; α]]([[∆; σ]]ρ) = [[∆; ασ]]ρ
+Lemma 22. If [[Γ]] is defined and a cubical set, and [[Γ; α]] is defined, then ([[Γ; α]]ρ)f =
+[[Γ; α]](ρf ).
+To state the next theorem let us set [[Γ; I]] = pIq and [[Γ; F]] = pFq as elements of Ty0 ([[Γ]]).
+Theorem 23 (Soundness). We have the following implications, and all occurrences of [[−]]
+in the conclusions are defined. In (3) and (5) we allow A to be I or F.
+1. if Γ ⊢ , then [[Γ]] is a cubical set;
+2. if Γ ⊢ A, then [[Γ; A]] ∈ Ter([[Γ]]; U1 );
+3. if Γ ⊢ t : A, then [[Γ; t]] ∈ Ter([[Γ]]; El [[Γ; A]]);
+4. if Γ ⊢ A = B, then [[Γ; A]] = [[Γ; B]];
+5. if Γ ⊢ a = b : A, then [[Γ; a]] = [[Γ; b]];
+6. if Γ ⊢ σ : ∆, then [[Γ; σ]] restricts to a natural transformation [[Γ]] → [[∆]].
+5 E.g., if Γ is y : B, z : C, the projection to the x-part maps (b, (c, (a, δ))) to a, and the projection to the
+Γ-part maps (b, (c, δ)) to (b, c).
+
+23
+
+9
+
+Extensions: identity types and higher inductive types
+
+In this section we consider possible extensions to cubical type theory. The first is an identity
+type defined using path types whose elimination principle holds as a judgmental equality.
+The second are two examples of higher inductive types.
+
+9.1
+
+Identity types
+
+We can use the path type to represent equalities. Using the composition operation, we
+can indeed build a substitution function P (a) → P (b) from any path between a and b.
+However, since we don’t have in general the judgmental equality transpi A a0 = a0 if A is
+independent of i (which is an equality that we cannot expect geometrically in general, as
+shown in Appendix C), this substitution function does not need to be the constant function
+when the path is constant. This means that, as in the previous model [6, 13], we don’t get
+an interpretation of Martin-Löf identity type [19] with the standard judgmental equalities.
+However, we can define another type which does give an interpretation of this identity
+type following an idea of Andrew Swan.
+Identity types
+The basic idea of Id A a0 a1 is to define it in terms of Path A a0 a1 but also mark the paths
+where they are known to be constant. Formally, the formation and introduction rules are
+Γ⊢A
+
+Γ ⊢ a0 : A
+Γ ⊢ a1 : A
+Γ ⊢ Id A a0 a1
+
+Γ ⊢ ω : Path A a0 a1 [ϕ 7→ hii a0 ]
+Γ ⊢ (ω, ϕ) : Id A a0 a1
+
+and we can define r a = (1a , 1F ) : Id A a a for a : A. The elimination rule, given Γ ⊢ a : A, is
+Γ, x : A, α : Id A a x ⊢ C
+
+Γ ⊢ d : C(x/a, α/ r a)
+Γ⊢b:A
+Γ ⊢ Jx,α.C d b β : C(x/b, α/β)
+
+Γ ⊢ β : Id A a b
+
+together with the following judgmental equality in case β is of the form (ω, ϕ)
+J d b β = compi C(x/ω i, α/β ∗ (i)) [ϕ 7→ d] d
+where Γ, i : I ⊢ β ∗ (i) : Id A a (ω i) is given by
+β ∗ (i) = (hji ω (i ∧ j), ϕ ∨ (i = 0)).
+Note that with this definition we get J d a (r a) = d as desired.
+The composition operation for Id is explained as follows. Given Γ, i : I ⊢ Id A a0 a1 ,
+Γ, ϕ, i : I ⊢ (ω, ψ) : Id A a0 a1 , and Γ ⊢ (ω0 , ψ0 ) : (Id A a0 a1 )(i0)[ϕ 7→ (ω(i0), ψ(i0))] we
+have the judgmental equality
+compi (Id A a0 a1 ) [ϕ 7→ (ω, ψ)] (ω0 , ψ0 ) = (compi (Path A a0 a1 ) [ϕ 7→ ω] ω0 , ϕ ∧ ψ(i1)).
+It can then be shown that the types Id A a b and Path A a b are (Path)-equivalent. In
+particular, a type is (Path)-contractible if, and only if, it is (Id)-contractible. The univalence
+axiom, proved in Section 7.2 for the Path-type, hence holds as well for the Id-type.6
+6 This has been formally verified using the Haskell implementation:
+https://github.com/mortberg/cubicaltt/blob/v1.0/examples/idtypes.ctt
+
+24
+
+Cofibration-trivial fibration factorization
+The same idea can be used to factorize an arbitrary map of (not necessary fibrant) cubical
+sets f : A → B into a cofibration followed by a trivial fibration. We define a “trivial
+fibration” to be a first projection from a total space of a contractible family of types and a
+“cofibration” to be a map that has the left lifting property against any trivial fibration. For
+this we define, for b : B, the type Tf (b) to be the type of elements [ϕ 7→ a] with ϕ ⊢ a : A
+and ϕ ⊢ f a = b : B.
+Theorem 24. The type Tf (b) is contractible and the map
+A → (b : B) × Tf (b),
+
+a 7−→ (f a, [1F 7→ a])
+
+is a cofibration.
+The definition of the identity type can be seen as a special case of this, if we take the B
+the type of paths in A and for f the constant path function.
+
+9.2
+
+Higher inductive types
+
+In this section we consider the extension of cubical type theory with two different higher
+inductive types: spheres and propositional truncation. The presentation in this section is
+syntactical, but it can be directly translated into semantic definitions.
+Extension to dependent path types
+In order to formulate the elimination rules for higher inductive types, we need to extend
+the path type to dependent path type, which is described by the following rules. If i : I ⊢ A
+and ⊢ a0 : A(i0), a1 : A(i1), then ⊢ Pathi A a0 a1 . The introduction rule is that ⊢ hii t :
+Pathi A t(i0) t(i1) if i : I ⊢ t : A. The elimination rule is ⊢ p r : A(i/r) if ⊢ p : Pathi A a0 a1
+with equalities p 0 = a0 : A(i0) and p 1 = a1 : A(i1).
+Spheres
+We define the circle, S1 , by the rules:
+Γ⊢
+
+Γ⊢
+
+Γ⊢r:I
+
+Γ ⊢ S1
+
+Γ ⊢ base : S1
+
+Γ ⊢ loop(r) : S1
+
+with the equalities loop(0) = loop(1) = base.
+Since we want to represent the free type with one base point and a loop, we add composition as a constructor operation hcompi :
+Γ, ϕ, i : I ⊢ u : S1
+
+Γ ⊢ u0 : S1 [ϕ 7→ u(i0)]
+
+Γ ⊢ hcompi [ϕ 7→ u] u0 : S1
+with the equality hcompi [1F 7→ u] u0 = u(i1).
+Given a dependent type x : S1 ⊢ A and a : A(x/base) and l : Pathi A(x/loop(i)) a a we
+can define a function g : (x : S1 ) → A by the equations7 g base = a and g loop(r) = l r and
+g (hcompi [ϕ 7→ u] u0 ) = compi A(x/v) [ϕ 7→ g u] (g u0 )
+where v = filli S1 [ϕ 7→ u] u0 = hcompj [ϕ 7→ u(i/i ∧ j), (i = 0) 7→ u0 ] u0 .
+This definition is non ambiguous since l 0 = l 1 = a.
+We have a similar definition for Sn taking as constructors base and loop(r1 , . . . , rn ).
+7 For the equation g loop(r) = l r, it may be that l and r are dependent on the same name i, and we
+could not have followed this definition in the framework of [6].
+
+25
+
+Propositional truncation
+We define the propositional truncation, inh A, of a type A by the rules:
+Γ⊢A
+Γ ⊢ inh A
+
+Γ⊢a:A
+Γ ⊢ inc a : inh A
+
+Γ ⊢ u0 : inh A
+Γ ⊢ u1 : inh A
+Γ⊢r:I
+Γ ⊢ squash(u0 , u1 , r) : inh A
+
+with the equalities squash(u0 , u1 , 0) = u0 and squash(u0 , u1 , 1) = u1 .
+As before, we add composition as a constructor, but only in the form8
+Γ, ϕ, i : I ⊢ u : inh A
+
+Γ ⊢ u0 : inh A[ϕ 7→ u(i0)]
+i
+
+Γ ⊢ hcomp [ϕ 7→ u] u0 : inh A
+with the equality hcompi [1F 7→ u] u0 = u(i1).
+This provides only a definition of compi (inh A) [ϕ 7→ u] u0 in the case where A is
+independent of i, and we have to explain how to define the general case.
+In order to do this, we define first two operations
+Γ, i : I ⊢ A
+
+Γ, i : I ⊢ A
+Γ ⊢ u0 : inh A(i0)
+Γ ⊢ transp u0 : inh A(i1)
+
+Γ, i : I ⊢ u : inh A
+
+i
+
+Γ ⊢ squeeze u : Path (inh A(i1)) (transp u(i0)) u(i1)
+
+by the equations
+transp (inc a)
+transp (squash(u0 , u1 , r))
+transp (hcompj [ϕ 7→ u] u0 )
+
+=
+=
+=
+
+squeezei (inc a)
+=
+squeezei (squash(u0 , u1 , r))
+=
+squeezei (hcompj [ϕ 7→ u] v) =
+
+inc (compi A [] a)
+squash(transp u0 , transp u1 , r)
+hcompj [ϕ 7→ transp u] (transp u0 )
+hii inc (compj A(i ∨ j) [(i = 1) 7→ a(i1)] a)
+hki squash(squeezei u0 k, squeezei u1 k, r(i/k))
+hki hcompj S (squeezei v k)
+
+where S is the system
+[δ 7→ squeezei u k, ϕ(i/k) ∧ (k = 0) 7→ transp u(i0), ϕ(i/k) ∧ (k = 1) 7→ u(i1)]
+and δ = ∀i.ϕ, using Lemma 2.
+Using these operations, we can define the general composition
+Γ, i : I ⊢ A
+
+Γ, ϕ, i : I ⊢ u : inh A
+
+Γ ⊢ u0 : inh A(i0)[ϕ 7→ u(i0)]
+
+i
+
+Γ ⊢ comp (inh A) [ϕ 7→ u] u0 : inh A(i1)[ϕ 7→ u(i1)]
+by Γ ⊢ compi (inh A) [ϕ 7→ u] u0 = hcompj [ϕ 7→ squeezei u j] (transp u0 ) : inh A(i1).
+Given Γ ⊢ B and Γ ⊢ q : (x y : B) → Path B x y and f : A → B we define g : inh A → B
+by the equations
+g (inc a)
+=
+g (squash(u0 , u1 , r))
+=
+g (hcompj [ϕ 7→ u] u0 ) =
+
+f a
+q (g u0 ) (g u1 ) r
+compj B [ϕ 7→ g u] (g u0 )
+
+8 This restriction on the constructor is essential for the justification of the elimination rule below.
+
+26
+
+10
+
+Related and future work
+
+Cubical ideas have proved useful to reason about equality in homotopy type theory [18].
+In cubical type theory these techniques could be simplified as there are new judgmental
+equalities and better notations for manipulating higher dimensional cubes. Indeed some
+simple experiments using the Haskell implementation have shown that we can simplify
+some constructions in synthetic homotopy theory.9
+Other approaches to extending intensional type theory with extensionality principles can
+be found in [2, 23]. These approaches have close connections to techniques for internalizing
+parametricity in type theory [5]. Further, nominal extensions to λ-calculus and semantical
+ideas related to the ones presented in this paper have recently also proved useful for justifying
+type theory with internalized parametricity [4].
+The paper [11] provides a general framework for analyzing the uniformity condition,
+which applies to simplicial and cubical sets.
+Large parts of the semantics presented in this paper have been formally verified in NuPrl
+by Mark Bickford10 , in particular, the definition of Kan filling in terms of composition as
+in Section 4.4 and composition for glueing as given in Section 6.2.
+Following the usual reducibility method, we expect it to be possible to adapt our presheaf
+semantics to a proof of normalization and decidability of type checking. A first step in this
+direction is the proof of canonicity in [14]. We end the paper with a list of open problems
+and conjectures:
+1. Extend the semantics of identity types to the semantics of inductive families.
+2. Give a general syntax and semantics of higher inductive types.
+3. Extend the system with resizing rules and show normalization.
+4. Is there a model where Path and Id coincide?
+Acknowledgements This work originates from discussions between the four authors
+around an implementation of a type system corresponding to the model described in [6].
+This implementation indicated a problem with the representation of higher inductive types,
+e.g., the elimination rule for the circle, and suggested the need of extending this cubical
+model with a diagonal operation. The general framework (uniformity condition, connections, semantics of spheres and propositional truncation) is due to the second author. In
+particular, the glueing operation with its composition was introduced as a generalization of
+the operation described in [6] transforming an equivalence into a path, and with the condition A = Glue [] A. In a first attempt, we tried to force “regularity”, i.e., the equation
+transp i A a0 = a0 if A is independent of i (which seemed to be necessary in order to get
+filling from compositions, and which implies Path = Id). There was a problem however for
+getting regularity for the universe, that was discovered by Dan Licata (from discussions with
+Carlo Angiuli and Bob Harper). Thanks to this discovery, it was realized that regularity is
+actually not needed for the model to work. In particular, the second author adapted the
+definition of filling from composition as in Section 4.4, the third author noticed that we
+can remove the condition A = Glue [] A, and together with the last author, they derived
+the univalence axiom from the glueing operation as presented in the appendix. This was
+surprising since glueing was introduced a priori only as a way to transform equivalences into
+paths, but was later explained by a remark of Dan Licata (also presented in the appendix:
+we get univalence as soon as the transport map associated to this path is path equal to
+the given equivalence). The second author introduced then the restriction operation Γ, ϕ
+9 For details see: https://github.com/mortberg/cubicaltt/tree/master/examples/
+10 For details see: http://www.nuprl.org/wip/Mathematics/cubical!type!theory/
+
+27
+
+on contexts, which, as noticed by Christian Sattler, can be seen as an explicit syntax for
+the notion of cofibration, and designed the other proof of univalence in Section 7.2 from
+discussions between Nicola Gambino, Peter LeFanu Lumsdaine and the third author. Not
+having regularity, the type of paths is not the same as the Id type but, as explained in
+Section 9.1, we can recover the usual identity type from the path type, following an idea of
+Andrew Swan.
+The authors would like to thank the referees and Martı́n Escardó, Georges Gonthier, Dan
+Grayson, Peter Hancock, Dan Licata, Peter LeFanu Lumsdaine, Christian Sattler, Andrew
+Swan, Vladimir Voevodsky for many interesting discussions and remarks.
+
+References
+[1] P. Aczel. On Relating Type Theories and Set Theories. In T. Altenkirch, B. Reus,
+and W. Naraschewski, editors, Types for Proofs and Programs, volume 1657 of Lecture
+Notes in Computer Science, pages 1–18. Springer Verlag, Berlin, Heidelberg, New York,
+1999. 18
+[2] T. Altenkirch. Extensional Equality in Intensional Type Theory. In 14th Annual IEEE
+Symposium on Logic in Computer Science, pages 412–420, 1999. 27
+[3] R. Balbes and P. Dwinger. Distributive Lattices. Abstract Space Publishing, 2011. 2,
+3, 8
+[4] J.-P. Bernardy, T. Coquand, and G. Moulin. A Presheaf Model of Parametric Type
+Theory. Electronic Notes in Theoretical Computer Science, 319:67–82, 2015. 27
+[5] J.-P. Bernardy and G. Moulin. Type-theory in Color. SIGPLAN Not., 48(9):61–72,
+September 2013. 27
+[6] M. Bezem, T. Coquand, and S. Huber. A Model of Type Theory in Cubical Sets. In
+R. Matthes and A. Schubert, editors, 19th International Conference on Types for Proofs
+and Programs (TYPES 2013), volume 26 of Leibniz International Proceedings in Informatics (LIPIcs), pages 107–128. Schloss Dagstuhl–Leibniz-Zentrum fuer Informatik,
+2014. 2, 3, 6, 7, 10, 12, 18, 24, 25, 27
+[7] R. Brown, P.J. Higgins, and R. Sivera. Nonabelian Algebraic Topology: Filtered Spaces,
+Crossed Complexes, Cubical Homotopy Groupoids, volume 15 of EMS tracts in mathematics. European Mathematical Society, 2011. 6
+[8] D.-C. Cisinski.
+Univalent universes for elegant models of homotopy types.
+arXiv:1406.0058, May 2014. Preprint. 16
+[9] P. Dybjer. Internal Type Theory. In Lecture Notes in Computer Science, pages 120–134.
+Springer Verlag, Berlin, Heidelberg, New York, 1996. 18
+[10] M. Fourman and D. Scott. Sheaves and logic. In M. Fourman, C. Mulvey, and D. Scott,
+editors, Applications of Sheaves, volume 753 of Lecture Notes in Mathematics, pages
+302–401. Springer Berlin Heidelberg, 1979. 9
+[11] N. Gambino and C. Sattler. Uniform Fibrations and the Frobenius Condition.
+arXiv:1510.00669, October 2015. Preprint. 27
+[12] M. Hofmann. Syntax and semantics of dependent types. In A.M. Pitts and P. Dybjer,
+editors, Semantics and logics of computation, volume 14 of Publ. Newton Inst., pages
+79–130. Cambridge University Press, Cambridge, 1997. 18
+28
+
+[13] S. Huber. A Model of Type Theory in Cubical Sets. Licentiate thesis, University of
+Gothenburg, May 2015. 2, 7, 10, 18, 24
+[14] S. Huber. Canonicity for cubical type theory. arXiv:1607.04156v1, July 2016. Preprint.
+27
+[15] J. A. Kalman. Lattices with involution. Transactions of the American Mathematical
+Society, 87:485–491, 1958. 5
+[16] D. M. Kan. Abstract homotopy. I. Proceedings of the National Academy of Sciences of
+the United States of America, 41(12):1092–1096, 1955. 11
+[17] C. Kapulkin and P. LeFanu Lumsdaine. The Simplicial Model of Univalent Foundations
+(after Voevodsky). arXiv:1211.2851v4, November 2012. Preprint. 14, 16
+[18] D. R. Licata and G. Brunerie. A Cubical Approach to Synthetic Homotopy Theory.
+In 30th Annual ACM/IEEE Symposium on Logic in Computer Science, pages 92–103,
+2015. 27
+[19] P. Martin-Löf. An intuitionistic theory of types: predicative part. In Logic Colloquium
+’73 (Bristol, 1973), pages 73–118. Studies in Logic and the Foundations of Mathematics,
+Vol. 80. North-Holland, Amsterdam, 1975. 2, 24
+[20] P. Martin-Löf. An intuitionistic theory of types. In G. Sambin and J. M. Smith, editors,
+Twenty-five years of constructive type theory (Venice, 1995), volume 36 of Oxford Logic
+Guides, pages 127–172. Oxford University Press, 1998. 2, 15
+[21] A. M. Pitts. Nominal Sets: Names and Symmetry in Computer Science. Cambridge
+University Press, New York, NY, USA, 2013. 5
+[22] A. M. Pitts. Nominal Presentation of Cubical Sets Models of Type Theory. In H. Herbelin, P. Letouzey, and M. Sozeau, editors, 20th International Conference on Types
+for Proofs and Programs (TYPES 2014), volume 39 of Leibniz International Proceedings in Informatics (LIPIcs), pages 202–220. Schloss Dagstuhl – Leibniz-Zentrum fuer
+Informatik, 2015. 2, 3
+[23] Andrew Polonsky. Extensionality of lambda-*. In H. Herbelin, P. Letouzey, and
+M. Sozeau, editors, 20th International Conference on Types for Proofs and Programs
+(TYPES 2014), volume 39 of Leibniz International Proceedings in Informatics (LIPIcs),
+pages 221–250. Schloss Dagstuhl–Leibniz-Zentrum fuer Informatik, 2015. 27
+[24] T. Streicher. Semantics of Type Theory. Progress in Theoretical Computer Science.
+Birkhäuser Basel, 1991. 18, 21
+[25] A. Swan. An Algebraic Weak Factorisation System on 01-Substitution Sets: A Constructive Proof. arXiv:1409.1829, September 2014. Preprint. 2
+[26] The Univalent Foundations Program. Homotopy Type Theory: Univalent Foundations of Mathematics. http://homotopytypetheory.org/book, Institute for Advanced
+Study, 2013. 2, 16, 33
+[27] V. Voevodsky. The equivalence axiom and univalent models of type theory. (Talk at
+CMU on February 4, 2010). arXiv:1402.5556, February 2014. Preprint. 2
+
+29
+
+A
+
+Details of composition for glueing
+
+We build the element Γ ⊢ b1 = compi B [ψ 7→ b] b0 : (Glue [ϕ 7→ (T, f )] A)(i1) as the
+element glue [ϕ(i1) 7→ t1 ] a1 where
+Γ, ϕ(i1) ⊢ t1 : T (i1)[ψ 7→ b(i1)]
+Γ ⊢ a1 : A(i1)[ϕ(i1) 7→ f (i1) t1 , ψ 7→ (unglue b)(i1)]
+As intermediate steps, we gradually build elements that satisfy more and more of the
+equations that the final elements t1 and a1 should satisfy. The construction of these is given
+in five steps.
+Before explaining how we can define them and why they are well defined, we illustrate
+the construction in Figure 5, with ψ = (j = 1) and ϕ = (i = 0) ∨ (j = 1) ∨ (i = 1).
+We pose δ = ∀i.ϕ (cf. Section 3), so that we have that δ is independent from i, and in
+our example δ = (j = 1) and it represents the right-hand side of the picture.
+1. The element a′1 : A(i1) is a first approximation of a1 , but a′1 is not necessarily in the
+image of f (i1) in Γ, ϕ(i1);
+2. the partial element δ ⊢ t′1 : T (i1), which is a partial final result for ϕ(i1) ⊢ t1 ;
+3. the partial path δ ⊢ ω, between a′1 and the image of t′1 ;
+4. both the final element ϕ(i1) ⊢ t1 and a path ϕ(i1) ⊢ α between a′1 and f (i1) t1 ;
+5. finally, we build a1 from a′1 and α.
+
+Step 4: ϕ(i1) ⊢ t1
+f
+
+Step 5: a1
+
+Step 2: δ ⊢ t′1
+f
+δ ⊢ f (i1) t′1
+
+Step 4’: ϕ(i1) ⊢ α
+
+Step 3: δ ⊢ ω constant on ψ
+b(j1)
+
+Step 1: a′1
+
+i
+
+(unglue b)(j1)
+
+j
+unglue b0
+f
+
+f
+
+f
+
+ϕ(i0) ⊢ b0
+
+Figure 5: Composition for glueing
+We define:
+Γ, ψ, i : I ⊢ a = unglue b : A[ϕ 7→ f b]
+Γ ⊢ a0 = unglue b0 : A(i0)[ϕ(i0) 7→ f (i0) b0 , ψ 7→ a(i0)]
+
+30
+
+Step 1 We define a′1 as the composition of a and unglue b0 , in the direction i, which
+is well defined since unglue b0 = (unglue b)(i0) over the extent ψ
+Γ ⊢ a′1 = compi A [ψ 7→ a] a0 : A(i1)[ψ 7→ a(i1)]
+
+(4)
+
+Step 2 We also define t′1 as the composition of b and b0 , in the direction i:
+Γ, δ ⊢ t′1 = compi T [ψ 7→ b] b0 : T (i1)[ψ 7→ b(i1)]
+(
+Γ, δ, i : I, ψ ⊢ b : T
+by Lemma 3
+which is well defined because
+Γ, δ ⊢ b0 : T (i0)[ψ 7→ b(i0)]
+as δ ⩽ ϕ(i0)
+
+(5)
+
+Moreover, since
+(
+
+Γ, δ, ψ, i : I ⊢ a = f b
+Γ, δ ⊢ a0 = f (i0) b0
+
+by δ ⩽ ϕ
+by δ ⩽ ϕ(i0)
+
+we can re-express a′1 on the extent δ
+Γ, δ ⊢ a′1 = compi A [ψ 7→ f b] (f (i0) b0 )
+Step 3
+
+We can hence find a path ω connecting a′1 and f (i1) t′1 in Γ, δ using Lemma 6:
+
+Γ, δ ⊢ ω = presi f [ψ 7→ b] b0 : (Path A(i1) a′1 (f (i1) t′1 )) [ψ 7→ hji a(i1)]
+Picking a fresh name j, we have
+Γ, δ, j : I ⊢ ω j : A(i1)[(j = 0) 7→ a′1 , (j = 1) 7→ f (i1) t′1 , ψ 7→ a(i1)]
+
+(6)
+
+Step 4 Now we define the final element t1 as the inverse image of a′1 by f (i1), together
+with the path α between a′1 and f (i1) t1 , in Γ, ϕ(i1) ⊢, using Lemma 7:
+Γ, ϕ(i1) ⊢ (t1 , α) = equiv f (i1) [δ 7→ (t′1 , ω), ψ 7→ (b(i1), hji a′1 )] a′1
+(
+Γ, ϕ(i1) ⊢ t1 : T (i1)[δ 7→ t′1 , ψ 7→ b(i1)]
+with
+Γ, ϕ(i1) ⊢ α : (Path A(i1) a′1 (f (i1) t1 )) [δ 7→ ω, ψ 7→ hji a′1 )]
+These are well defined because the two systems in δ and ψ are compatible:
+(
+Γ, δ, ψ ⊢ t′1 = b(i1) by (5)
+Γ, δ, ψ ⊢ ω = hji a′1 by (6) and (4)
+Picking a fresh name j, we have
+Γ, ϕ(i1), j : I ⊢ α j : A(i1)[(j = 0) 7→ a′1 , (j = 1) 7→ f (i1) t1 , δ 7→ a′1 , ψ 7→ a(i1)]
+
+(7)
+
+Step 5 Finally, we define a1 by composition of α and a′1 :
+Γ ⊢ a1 := compj A(i1) [ϕ(i1) 7→ α j, ψ 7→ a(i1)] a′1 : A(i1)[ϕ(i1) 7→ α 1, ψ 7→ a(i1)]
+
+
+Γ, j : I, ϕ(i1), ψ ⊢ α j = a(i1) by (7)
+which is well defined because
+Γ, ϕ(i1) ⊢ α 0 = a′1
+by (7)
+
+
+′
+Γ, ψ ⊢ a(i1) = a1
+by (4)
+
+and since Γ, ϕ(i1) ⊢ α 1 = f (i1) t1 , we can re-express the type of a1 in the following way:
+Γ ⊢ a1 : A(i1)[ϕ(i1) 7→ f (i1) t1 , ψ 7→ a(i1)]
+31
+
+Which is exactly what we needed to build Γ ⊢ b1 := glue [ϕ(i1) 7→ t1 ] a1 : B(i1)[ψ 7→ b(i1)].
+Finally we check that b1 = compi T [ψ 7→ b] b0 on δ:
+b1 = glue [ϕ(i1) 7→ t1 ] a1
+= t1 : T (i1)[δ 7→ t′1 , ψ 7→ b(i1)]
+= t′1
+
+as δ = 1F
+i
+
+= comp T [ψ 7→ b] b0
+
+B
+
+by def.
+as ϕ(i1) = 1F
+by def.
+
+Univalence from glueing
+
+We also give two alternative proofs of the univalence axiom for Path only involving the glue
+construction.11 The first is a direct proof of the standard formulation of the univalence
+axiom while the second goes through an alternative formulation as in Corollary 10.12
+Lemma 25. For Γ ⊢ A : U, Γ ⊢ B : U, and an equivalence Γ ⊢ f : Equiv A B we have the
+following constructions:
+1. Γ ⊢ eqToPath f : Path U A B;
+2. Γ ⊢ Path (A → B) (transpi (eqToPath f i))) f.1 is inhabited; and
+3. if f = equivi (P i) for Γ ⊢ P : Path U A B, then the following type is inhabited:
+Γ ⊢ Path (Path U A B) (eqToPath (equivi (P i))) P
+Proof. For (1) we define
+eqToPath f = hii Glue [(i = 0) 7→ (A, f ), (i = 1) 7→ (B, equivk B)] B.
+
+(8)
+
+Note that here equivk B is an equivalence between B and B (see Section 7.1). For (2) we have
+to closely look at how the composition was defined for Glue. By unfolding the definition, we
+see that the left-hand side of the equality is equal f.1 composed with multiple transports in
+a constant type; using filling and functional extensionality, these transports can be shown
+to be equal to the identity; for details see the formal proof.
+The term for (3) is given by:
+hji hii Glue [(i = 0) 7→ (A, equivk (P k)),
+(i = 1) 7→ (B, equivk B),
+(j = 1) 7→ (P i, equivk (P (i ∨ k)))]
+B
+Corollary 26 (Univalence axiom). For the canonical map
+pathToEq : (A B : U) → Path U A B → Equiv A B
+we have that pathToEq A B is an equivalence for all A : U and B : U.
+11 The proofs of the univalence axiom have all been formally verified inside the system using the Haskell
+implementation. We note that the proof of Theorem 9 can be given such that it extends f .2 and hence in
+Corollary 10 we do not need the fact that isEquiv X A f .1 is a proposition. For details see:
+https://github.com/mortberg/cubicaltt/blob/v1.0/examples/univalence.ctt
+12 The second of these proofs is inspired by a proof by Dan Licata from:
+https://groups.google.com/d/msg/homotopytypetheory/j2KBIvDw53s/YTDK4D0NFQAJ
+
+32
+
+Proof 1. Let us first show that the canonical map pathToEq is path equal to:
+equiv = λA B : U. λP : Path U A B. equivi (P i)
+By function extensionality, it suffices to check this pointwise. Using path-induction, we may
+assume that P is reflexivity. In this case pathToEq A A 1A is the identity equivalence by
+definition. Because being an equivalence is a proposition, it thus suffices that the first component of equivi A is propositionally equal to the identity. By definition, this first component
+is given by transport (now in the constant type A) which is easily seen to be the identity
+using filling (see Section 4.4).
+Thus it suffices to prove that equiv A B is an equivalence. To do so it is enough to
+give an inverse (see Theorems 4.2.3 and 4.2.6 of [26]). But eqToPath is a left inverse by
+Lemma 25 (3), and a right inverse by Lemma 25 (2) using that being an equivalence is a
+proposition.
+Proof 2. Points (1) and (2) of Lemma 25 imply that Equiv A B is a retract of Path U A B.
+Hence (X : U) × Equiv A X is a retract of (X : U) × Path U A X. But (X : U) × Path U A X
+is contractible, so (X : U) × Equiv A X is also contractible as a retract of a contractible
+type. As discussed in Section 7.2 this is an alternative formulation of the univalence axiom
+and the rest of this proof follows as there.
+Note that the first proof uses all three of the points of Lemma 25 while the second proof
+only uses the first two. As the second proof only uses the first two points it is possible to
+prove it if point (1) is defined as in Example 8 leading to a slightly simpler proof of point (2).
+
+C
+
+Singular cubical sets
+
+Recall the functor C → Top, I 7→ [0, 1]I given at (1) in Section 8.1. In particular, the face
+maps (ib) : I − i → I (for b = 0I or 1I ) induce the maps (ib) : [0, 1]I−i → [0, 1]I by i(ib)u = b
+and j(ib)u = ju if j 6= i is in I. If ψ is in F(I) and u in [0, 1]I , then ψu is a truth value.
+We assume given a family of idempotent functions rI : [0, 1]I × [0, 1] → [0, 1]I × [0, 1]
+such that
+1. rI (u, z) = (u, z) iff ∂I u = 1 or z = 0, and
+2. for any strict f in Hom(I, J) we have rJ (f × id)rI = rJ (f × id).
+Such a family can for instance be defined as in the following picture (“retraction from
+above center”). If the center has coordinate (1/2, 2), then rI (u, z) = rI (u′ , z ′ ) is equivalent
+to (2 − z ′ )(−1 + 2u) = (2 − z)(−1 + 2u′ ).
+
+Property (1) holds for the retraction defined by this picture. The property (2) can be
+reformulated as rI (u, z) = rI (u′ , z ′ ) → rJ (f u, z) = rJ (f u′ , z ′ ). It also holds in this case,
+since rI (u, z) = rI (u′ , z ′ ) is then equivalent to (2 − z ′ )(−1 + 2u) = (2 − z)(−1 + 2u′ ), which
+implies (2 − z ′ )(−1 + 2f u) = (2 − z)(−1 + 2f u′ ) if f is strict.
+33
+
+Using this family, we can define for each ψ in F(I) an idempotent function
+rψ : [0, 1]I × [0, 1] → [0, 1]I × [0, 1]
+having for fixed-points the element (u, z) such that ψu = 1 or z = 0. This function rψ is
+completely characterized by the following properties:
+1. rψ = id if ψ = 1
+2. rψ = rψ rI if ψ 6= 1
+3. rψ (u, z) = (u, z) if z = 0
+4. rψ ((ib) × id) = ((ib) × id)rψ(ib)
+These properties imply for instance r∂I (u, z) = (u, z) if ∂I u = 1 or z = 0 and so they
+imply r∂I = rI . They also imply that rψ (u, z) = (u, z) if ψu = 1.
+From these properties, we can prove the uniformity of the family of functions rψ .
+Theorem 27. If f is in Hom(I, J) and ψ is in F(J), then rψ (f × id) = (f × id)rψf .
+This is proved by induction on the number of element of I (the result being clear if I is
+empty).
+A particular case is rJ (f × id) = (f × id)r∂J f . Note that, in general, ∂J f is not ∂I .
+A direct consequence of the previous theorem is the following.
+Corollary 28. The singular cubical set associated to a topological space has a composition
+structure.
+
+34
+
+
