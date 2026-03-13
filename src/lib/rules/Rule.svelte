@@ -79,7 +79,10 @@
 
   {#if rule.controls}
     <div class="controls">
-      <svelte:component this={rule.controls} />
+      {#if typeof rule.controls === 'function'}
+        {@const Component = rule.controls}
+        <Component />
+      {/if}
     </div>
   {/if}
 </div>

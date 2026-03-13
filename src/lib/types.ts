@@ -4,7 +4,8 @@ export type VisualizationType =
   | 'square'
   | 'cube'
   | 'composition'
-  | 'transport';
+  | 'transport'
+  | 'path-type-rule';
 
 export interface VisualizationInfo {
   label: string;
@@ -42,5 +43,10 @@ export const VISUALIZATIONS: Record<VisualizationType, VisualizationInfo> = {
     label: 'Transport',
     icon: '⇝',
     description: 'Transport — moving an element along a path in a type family',
+  },
+  'path-type-rule': {
+    label: 'Path Type Rule',
+    icon: '⊢',
+    description: 'Path type introduction rule with typing judgment',
   },
 };

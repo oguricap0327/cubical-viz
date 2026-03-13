@@ -1,19 +1,31 @@
 <script lang="ts">
   import Scene from './lib/Scene.svelte';
   import Controls from './lib/Controls.svelte';
+  import PathTypeRule from './lib/rules/PathTypeRule.svelte';
   import { type VisualizationType, VISUALIZATIONS } from './lib/types';
 
   let current: VisualizationType = $state('interval');
+
+  // Determine if current visualization is a rule-based one
+  let isRuleBased = $derived(current === 'path-type-rule');
 </script>
 
 <main>
-  <div class="header">
-    <h1>Cubical Type Theory Visualizer</h1>
-    <p>{VISUALIZATIONS[current].description}</p>
-  </div>
+  {#if isRuleBased}
+    <!-- Rule-based visualization with its own layout -->
+    {#if current === 'path-type-rule'}
+      <PathTypeRule />
+    {/if}
+  {:else}
+    <!-- Legacy geometric visualizations -->
+    <div class="header">
+      <h1>Cubical Type Theory Visualizer</h1>
+      <p>{VISUALIZATIONS[current].description}</p>
+    </div>
 
-  <Controls selected={current} onSelect={(v) => (current = v)} />
-  <Scene visualization={current} />
+    <Controls selected={current} onSelect={(v) => (current = v)} />
+    <Scene visualization={current} />
+  {/if}
 </main>
 
 <style>

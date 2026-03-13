@@ -1,0 +1,174 @@
+\begin{thebibliography}{10}
+
+\bibitem{Aczel99}
+P.~Aczel.
+\newblock {On Relating Type Theories and Set Theories}.
+\newblock In T.~Altenkirch, B.~Reus, and W.~Naraschewski, editors, {\em Types
+  for Proofs and Programs}, volume 1657 of {\em Lecture Notes in Computer
+  Science}, pages 1--18. Springer Verlag, Berlin, Heidelberg, New York, 1999.
+
+\bibitem{Altenkirch99}
+T.~Altenkirch.
+\newblock {Extensional Equality in Intensional Type Theory}.
+\newblock In {\em 14th Annual {IEEE} Symposium on Logic in Computer Science},
+  pages 412--420, 1999.
+
+\bibitem{Balbes}
+R.~Balbes and P.~Dwinger.
+\newblock {\em {Distributive Lattices}}.
+\newblock Abstract Space Publishing, 2011.
+
+\bibitem{paramtt}
+J.-P. Bernardy, T.~Coquand, and G.~Moulin.
+\newblock {A Presheaf Model of Parametric Type Theory}.
+\newblock {\em Electronic Notes in Theoretical Computer Science}, 319:67--82,
+  2015.
+
+\bibitem{ttincolor}
+J.-P. Bernardy and G.~Moulin.
+\newblock {Type-theory in Color}.
+\newblock {\em SIGPLAN Not.}, 48(9):61--72, September 2013.
+
+\bibitem{BCH}
+M.~Bezem, T.~Coquand, and S.~Huber.
+\newblock {A Model of Type Theory in Cubical Sets}.
+\newblock In R.~Matthes and A.~Schubert, editors, {\em 19th International
+  Conference on Types for Proofs and Programs (TYPES 2013)}, volume~26 of {\em
+  Leibniz International Proceedings in Informatics (LIPIcs)}, pages 107--128.
+  Schloss Dagstuhl--Leibniz-Zentrum fuer Informatik, 2014.
+
+\bibitem{Brown}
+R.~Brown, P.J. Higgins, and R.~Sivera.
+\newblock {\em {Nonabelian Algebraic Topology: Filtered Spaces, Crossed
+  Complexes, Cubical Homotopy Groupoids}}, volume~15 of {\em EMS tracts in
+  mathematics}.
+\newblock European Mathematical Society, 2011.
+
+\bibitem{Cisinski}
+D.-C. {Cisinski}.
+\newblock {Univalent universes for elegant models of homotopy types}.
+\newblock {\em arXiv:1406.0058}, May 2014.
+\newblock Preprint.
+
+\bibitem{Dybjer96}
+P.~Dybjer.
+\newblock {Internal Type Theory}.
+\newblock In {\em Lecture Notes in Computer Science}, pages 120--134. Springer
+  Verlag, Berlin, Heidelberg, New York, 1996.
+
+\bibitem{Fourman-Scott}
+M.~Fourman and D.~Scott.
+\newblock Sheaves and logic.
+\newblock In M.~Fourman, C.~Mulvey, and D.~Scott, editors, {\em {Applications
+  of Sheaves}}, volume 753 of {\em Lecture Notes in Mathematics}, pages
+  302--401. Springer Berlin Heidelberg, 1979.
+
+\bibitem{GambinoSattler}
+N.~{Gambino} and C.~{Sattler}.
+\newblock {Uniform Fibrations and the Frobenius Condition}.
+\newblock {\em arXiv:1510.00669}, October 2015.
+\newblock Preprint.
+
+\bibitem{Hofmann97}
+M.~Hofmann.
+\newblock Syntax and semantics of dependent types.
+\newblock In A.M. Pitts and P.~Dybjer, editors, {\em Semantics and logics of
+  computation}, volume~14 of {\em Publ. Newton Inst.}, pages 79--130. Cambridge
+  University Press, Cambridge, 1997.
+
+\bibitem{simonlic}
+S.~Huber.
+\newblock {\em {A Model of Type Theory in Cubical Sets}}.
+\newblock Licentiate thesis, University of Gothenburg, May 2015.
+
+\bibitem{Huber16}
+S.~Huber.
+\newblock Canonicity for cubical type theory.
+\newblock {\em arXiv:1607.04156v1}, July 2016.
+\newblock Preprint.
+
+\bibitem{Kalman58}
+J.~A. Kalman.
+\newblock Lattices with involution.
+\newblock {\em Transactions of the American Mathematical Society}, 87:485--491,
+  1958.
+
+\bibitem{Kan55}
+D.~M. Kan.
+\newblock Abstract homotopy. {I}.
+\newblock {\em Proceedings of the National Academy of Sciences of the United
+  States of America}, 41(12):1092--1096, 1955.
+
+\bibitem{KL}
+C.~{Kapulkin} and P.~{LeFanu Lumsdaine}.
+\newblock {The Simplicial Model of Univalent Foundations (after {V}oevodsky)}.
+\newblock {\em arXiv:1211.2851v4}, November 2012.
+\newblock Preprint.
+
+\bibitem{LicataBrunerie}
+D.~R. Licata and G.~Brunerie.
+\newblock {A Cubical Approach to Synthetic Homotopy Theory}.
+\newblock In {\em 30th Annual {ACM/IEEE} Symposium on Logic in Computer
+  Science}, pages 92--103, 2015.
+
+\bibitem{ML75}
+P.~Martin-Löf.
+\newblock An intuitionistic theory of types: predicative part.
+\newblock In {\em Logic {C}olloquium '73 ({B}ristol, 1973)}, pages 73--118.
+  Studies in Logic and the Foundations of Mathematics, Vol. 80. North-Holland,
+  Amsterdam, 1975.
+
+\bibitem{MLTT72}
+P.~Martin-Löf.
+\newblock An intuitionistic theory of types.
+\newblock In G.~Sambin and J.~M. Smith, editors, {\em Twenty-five years of
+  constructive type theory ({V}enice, 1995)}, volume~36 of {\em Oxford Logic
+  Guides}, pages 127--172. Oxford University Press, 1998.
+
+\bibitem{PittsBook}
+A.~M. Pitts.
+\newblock {\em {Nominal Sets: Names and Symmetry in Computer Science}}.
+\newblock Cambridge University Press, New York, NY, USA, 2013.
+
+\bibitem{Pitts}
+A.~M. Pitts.
+\newblock {Nominal Presentation of Cubical Sets Models of Type Theory}.
+\newblock In H.~Herbelin, P.~Letouzey, and M.~Sozeau, editors, {\em 20th
+  International Conference on Types for Proofs and Programs (TYPES 2014)},
+  volume~39 of {\em Leibniz International Proceedings in Informatics (LIPIcs)},
+  pages 202--220. Schloss Dagstuhl -- Leibniz-Zentrum fuer Informatik, 2015.
+
+\bibitem{Polonsky14}
+Andrew Polonsky.
+\newblock {Extensionality of lambda-*}.
+\newblock In H.~Herbelin, P.~Letouzey, and M.~Sozeau, editors, {\em 20th
+  International Conference on Types for Proofs and Programs (TYPES 2014)},
+  volume~39 of {\em Leibniz International Proceedings in Informatics (LIPIcs)},
+  pages 221--250. Schloss Dagstuhl--Leibniz-Zentrum fuer Informatik, 2015.
+
+\bibitem{Streicher91}
+T.~Streicher.
+\newblock {\em {Semantics of Type Theory}}.
+\newblock Progress in Theoretical Computer Science. Birkh{\"a}user Basel, 1991.
+
+\bibitem{Swan}
+A.~{Swan}.
+\newblock {An Algebraic Weak Factorisation System on 01-Substitution Sets: A
+  Constructive Proof}.
+\newblock {\em arXiv:1409.1829}, September 2014.
+\newblock Preprint.
+
+\bibitem{hott-book}
+The {Univalent Foundations Program}.
+\newblock {\em {Homotopy Type Theory: Univalent Foundations of Mathematics}}.
+\newblock \url{http://homotopytypetheory.org/book}, Institute for Advanced
+  Study, 2013.
+
+\bibitem{Voevodsky}
+V.~{Voevodsky}.
+\newblock {The equivalence axiom and univalent models of type theory. (Talk at
+  CMU on February 4, 2010)}.
+\newblock {\em arXiv:1402.5556}, February 2014.
+\newblock Preprint.
+
+\end{thebibliography}
