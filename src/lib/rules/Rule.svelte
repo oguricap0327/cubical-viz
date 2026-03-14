@@ -6,71 +6,212 @@
   import { createOrbitControls } from '../three/controls';
   import { createRenderer, updateRendererSize } from '../three/renderer';
   import { createScene } from '../three/scene';
+  import { hoveredTerm } from '../hoverState';
   import type { Snippet } from 'svelte';
 
   let { rule, controls }: { rule: RuleDefinition; controls?: Snippet } = $props();
 
   let canvas: HTMLCanvasElement;
+  let ruleHeader: HTMLDivElement;
   let scene: THREE.Scene;
   let camera: THREE.PerspectiveCamera;
   let renderer: THREE.WebGLRenderer;
   let orbitControls: ReturnType<typeof createOrbitControls>;
 
+  // Track original materials for highlight restore
+  const originalEmissives = new Map<THREE.Object3D, { color: THREE.Color; intensity: number }>();
+
+  function saveOriginals(objects: THREE.Object3D[]) {
+    for (const obj of objects) {
+      if (originalEmissives.has(obj)) continue;
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
+      if (mat && 'emissive' in mat) {
+        originalEmissives.set(obj, { color: mat.emissive.clone(), intensity: mat.emissiveIntensity });
+      }
+    }
+  }
+
+  function applyHighlight(objects: THREE.Object3D[]) {
+    for (const obj of objects) {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
+      if (mat && 'emissive' in mat) {
+        saveOriginals([obj]);
+        mat.emissive.set(0xffdc50);
+        mat.emissiveIntensity = 1.5;
+      }
+    }
+  }
+
+  function clearHighlight(objects: THREE.Object3D[]) {
+    for (const obj of objects) {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
+      const orig = originalEmissives.get(obj);
+      if (mat && 'emissive' in mat && orig) {
+        mat.emissive.copy(orig.color);
+        mat.emissiveIntensity = orig.intensity;
+      }
+    }
+  }
+
   onMount(() => {
-    // Initialize Three.js using utilities
     scene = createScene();
     camera = createCamera();
     renderer = createRenderer(canvas);
     orbitControls = createOrbitControls(camera, renderer.domElement);
 
-    // Call rule-specific setup
     rule.setup(scene, camera);
 
-    // Expose scene for update callbacks
+    // Pre-save originals for all mapped objects
+    if (rule.termMappings) {
+      for (const m of rule.termMappings) saveOriginals(m.objects);
+    }
+
     (window as any)._currentScene = scene;
+
+    // --- Raycasting for 3D hover ---
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let currentHover3D: string | null = null;
+    let hoverSource: 'dom' | '3d' | null = null;
+
+    // Collect all raycast-able meshes mapped to termKeys
+    function getRaycastTargets(): { obj: THREE.Object3D; key: string }[] {
+      const targets: { obj: THREE.Object3D; key: string }[] = [];
+      if (!rule.termMappings) return targets;
+      for (const m of rule.termMappings) {
+        for (const obj of m.objects) {
+          if ((obj as THREE.Mesh).isMesh) {
+            targets.push({ obj, key: m.termKey });
+          }
+        }
+      }
+      return targets;
+    }
+
+    function onCanvasMouseMove(e: MouseEvent) {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const targets = getRaycastTargets();
+      const meshes = targets.map(t => t.obj);
+      const intersects = raycaster.intersectObjects(meshes, false);
+
+      if (intersects.length > 0) {
+        const hit = targets.find(t => t.obj === intersects[0].object);
+        if (hit && currentHover3D !== hit.key) {
+          currentHover3D = hit.key;
+          hoverSource = '3d';
+          hoveredTerm.set(hit.key);
+        }
+      } else if (currentHover3D !== null) {
+        currentHover3D = null;
+        if (hoverSource === '3d') {
+          hoveredTerm.set(null);
+          hoverSource = null;
+        }
+      }
+    }
+
+    function onCanvasMouseLeave() {
+      if (hoverSource === '3d') {
+        currentHover3D = null;
+        hoveredTerm.set(null);
+        hoverSource = null;
+      }
+    }
+
+    canvas.addEventListener('mousemove', onCanvasMouseMove);
+    canvas.addEventListener('mouseleave', onCanvasMouseLeave);
+
+    // --- Subscribe to hoveredTerm to highlight 3D objects & DOM ---
+    const unsubscribe = hoveredTerm.subscribe((key) => {
+      if (!rule.termMappings) return;
+
+      // Clear all highlights
+      for (const m of rule.termMappings) clearHighlight(m.objects);
+
+      // Apply highlight to matching term
+      if (key) {
+        const mapping = rule.termMappings.find(m => m.termKey === key);
+        if (mapping) applyHighlight(mapping.objects);
+      }
+
+      // Update DOM highlighted class
+      if (ruleHeader) {
+        ruleHeader.querySelectorAll('.term-hover.highlighted').forEach(el =>
+          el.classList.remove('highlighted')
+        );
+        if (key) {
+          ruleHeader.querySelectorAll(`.term-hover[data-term="${key}"]`).forEach(el =>
+            el.classList.add('highlighted')
+          );
+        }
+      }
+    });
 
     const clock = new THREE.Clock();
     let animationId: number;
 
-    // Animation loop
     function animate() {
       animationId = requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
-      
+
       if (rule.update) {
         rule.update(time);
       }
-      
+
       orbitControls.update();
       renderer.render(scene, camera);
     }
     animate();
 
-    // Handle window resize
     function onResize() {
       updateCameraAspect(camera, window.innerWidth / window.innerHeight);
       updateRendererSize(renderer, window.innerWidth, window.innerHeight);
     }
     window.addEventListener('resize', onResize);
 
-    // Cleanup
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener('resize', onResize);
+      canvas.removeEventListener('mousemove', onCanvasMouseMove);
+      canvas.removeEventListener('mouseleave', onCanvasMouseLeave);
+      unsubscribe();
       (window as any)._currentScene = null;
-      
+
       if (rule.cleanup) {
         rule.cleanup(scene);
       }
-      
+
       orbitControls.dispose();
       renderer.dispose();
     };
   });
+
+  function onHeaderMouseOver(e: MouseEvent) {
+    const el = (e.target as HTMLElement).closest('[data-term]');
+    hoveredTerm.set(el ? el.getAttribute('data-term') : null);
+  }
+
+  function onHeaderMouseLeave() {
+    hoveredTerm.set(null);
+  }
 </script>
 
 <div class="rule-container">
-  <div class="rule-header">
+  <div
+    class="rule-header"
+    bind:this={ruleHeader}
+    onmouseover={onHeaderMouseOver}
+    onmouseleave={onHeaderMouseLeave}
+    role="region"
+    aria-label="Typing rule"
+  >
     <h2>{rule.name}</h2>
     <div class="rule-judgment">
       {@html rule.judgment}
@@ -156,4 +297,15 @@
   :global(.nd-premises) { font-size: 0.9rem; margin-bottom: 4px; }
   :global(.nd-line) { border: none; border-top: 1.5px solid #88ccff; margin: 4px 60px; }
   :global(.nd-conclusion) { font-size: 0.95rem; }
+
+  :global(.term-hover) {
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.15s, outline-color 0.15s;
+  }
+  :global(.term-hover:hover),
+  :global(.term-hover.highlighted) {
+    background: rgba(255, 220, 80, 0.25);
+    outline: 1px solid rgba(255, 220, 80, 0.5);
+  }
 </style>

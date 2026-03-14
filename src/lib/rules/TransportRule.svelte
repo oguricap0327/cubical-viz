@@ -9,6 +9,8 @@
 
   const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
   const kd = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: true });
+  const kt = (f: string, key: string) =>
+    `<span class="term-hover" data-term="${key}">${km(f)}</span>`;
 
   let timeValue = $state(0);
   let playing = $state(true);
@@ -24,9 +26,9 @@
     name: "Transport - Coercion Along Paths",
     judgment: `
       <div class="nd-rule">
-        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A \\quad \\Gamma \\vdash a : A(i_0)')}</div>
+        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash')} ${kt('A', 'A')} ${km('\\quad \\Gamma \\vdash')} ${kt('a', 'a')} ${km(': ')} ${kt('A(i_0)', 'A_i0')}</div>
         <hr class="nd-line">
-        <div class="nd-conclusion">${km('\\Gamma \\vdash \\mathrm{transp}^i\\, A\\, a : A(i_1)')}</div>
+        <div class="nd-conclusion">${km('\\Gamma \\vdash')} ${kt('\\mathrm{transp}^i\\, A\\, a', 'transp_a')} ${km(':')} ${kt('A(i_1)', 'A_i1')}</div>
       </div>
     `,
     description: `Transport moves an element along a path in a type family. It's a special case of composition: ${km('\\mathrm{transp}^i\\, A\\, a = \\mathrm{comp}^i\\, A\\, [\\,]\\, a')}`,
@@ -34,7 +36,6 @@
     setup: (scene: THREE.Scene, camera: THREE.Camera) => {
       const group = new THREE.Group();
       
-      // Create two shapes representing A(i0) and A(i1)
       // A(i0) - sphere (blue)
       const sphereGeometry = new THREE.SphereGeometry(0.3, 32, 32);
       const sphereMaterial = new THREE.MeshStandardMaterial({
@@ -114,6 +115,15 @@
       (scene as any)._element = element;
       (scene as any)._pathCurve = pathCurve;
       (scene as any)._labelElement = labelElement;
+
+      // Populate term mappings for hover highlighting
+      transportRule.termMappings = [
+        { termKey: 'a', objects: [element] },
+        { termKey: 'A', objects: [pathLine] },
+        { termKey: 'A_i0', objects: [sphere] },
+        { termKey: 'A_i1', objects: [torus] },
+        { termKey: 'transp_a', objects: [element, torus] },
+      ];
     },
     
     update: (time: number) => {
@@ -125,7 +135,6 @@
       const labelElement = (scene as any)._labelElement;
       
       if (element && pathCurve) {
-        // Use manual control if slider is being used, otherwise animate
         const t = manualControl ? timeValue : (Math.sin(time * 0.5) + 1) / 2;
         const pos = pathCurve.getPointAt(t);
         element.position.copy(pos);
@@ -134,7 +143,6 @@
           labelElement.position.set(pos.x, pos.y + 0.4, pos.z);
         }
         
-        // Update timeValue for display
         if (!manualControl && playing) {
           timeValue = t;
         }

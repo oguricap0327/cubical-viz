@@ -9,6 +9,8 @@
 
   const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
   const kd = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: true });
+  const kt = (f: string, key: string) =>
+    `<span class="term-hover" data-term="${key}">${km(f)}</span>`;
 
   let timeValue = $state(0);
   let playing = $state(true);
@@ -24,9 +26,9 @@
     name: "Composition - The Heart of Cubical",
     judgment: `
       <div class="nd-rule">
-        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A \\quad \\Gamma \\vdash \\varphi : \\mathbb{F} \\quad \\Gamma,\\, \\varphi,\\, i : \\mathbb{I} \\vdash u : A \\quad \\Gamma \\vdash a_0 : A(i_0)[\\varphi \\mapsto u(i_0)]')}</div>
+        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A \\quad \\Gamma \\vdash \\varphi : \\mathbb{F} \\quad \\Gamma,\\, \\varphi,\\, i : \\mathbb{I} \\vdash')} ${kt('u', 'u')} ${km(': A \\quad \\Gamma \\vdash')} ${kt('a_0', 'a0')} ${km(': A(i_0)[\\varphi \\mapsto u(i_0)]')}</div>
         <hr class="nd-line">
-        <div class="nd-conclusion">${km('\\Gamma \\vdash \\mathrm{comp}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0 : A(i_1)[\\varphi \\mapsto u(i_1)]')}</div>
+        <div class="nd-conclusion">${km('\\Gamma \\vdash')} ${kt('\\mathrm{comp}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0', 'comp')} ${km(': A(i_1)[\\varphi \\mapsto u(i_1)]')}</div>
       </div>
     `,
     description: `Being extensible is preserved along paths: if a partial path is extensible at ${km('i=0')}, then it is extensible at ${km('i=1')}.`,
@@ -34,7 +36,6 @@
     setup: (scene: THREE.Scene, camera: THREE.Camera) => {
       const group = new THREE.Group();
       
-      // Create an "open box" - a cube with some faces highlighted
       const boxSize = 1.2;
       
       // Base face (at i=0) - blue
@@ -59,13 +60,11 @@
         opacity: 0.6,
       });
       
-      // Left side
       const leftSide = new THREE.Mesh(sideGeometry, sideMaterial);
       leftSide.position.set(-boxSize/2, 0, 0);
       leftSide.rotation.y = Math.PI / 2;
       group.add(leftSide);
       
-      // Right side
       const rightSide = new THREE.Mesh(sideGeometry, sideMaterial);
       rightSide.position.set(boxSize/2, 0, 0);
       rightSide.rotation.y = -Math.PI / 2;
@@ -108,9 +107,15 @@
       
       scene.add(group);
       
-      // Store references for animation
       (scene as any)._compositionGroup = group;
       (scene as any)._lid = lid;
+
+      // Populate term mappings for hover highlighting
+      compositionRule.termMappings = [
+        { termKey: 'a0', objects: [base] },
+        { termKey: 'u', objects: [leftSide, rightSide] },
+        { termKey: 'comp', objects: [lid] },
+      ];
     },
     
     update: (time: number) => {
@@ -119,11 +124,9 @@
       
       const lid = (scene as any)._lid;
       if (lid) {
-        // Use manual control if slider is being used, otherwise animate
         const t = manualControl ? timeValue : (Math.sin(time * 0.5) + 1) / 2;
         lid.material.opacity = t * 0.7;
         
-        // Update timeValue for display
         if (!manualControl && playing) {
           timeValue = t;
         }
