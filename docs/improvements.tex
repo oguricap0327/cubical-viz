@@ -279,6 +279,38 @@ Currently the visualizer always starts at the Interval page. Adding URL hash rou
 (e.g.\ \texttt{/cubical-viz/\#transport-rule}) would allow linking directly to a
 specific rule, making it useful for sharing in papers or lecture notes.
 
+\subsection{Gradient Colors for Continuous Transformations}
+
+Many of the concepts in cubical type theory involve \emph{continuous variation} along
+the interval $\mathbb{I}$. Flat colors fail to communicate this — they make
+transformations look like discrete jumps. Vertex-color gradients can make the
+continuity viscerally obvious.
+
+\begin{itemize}
+  \item \textbf{Interval dimension}: Color geometry by the value of $i \in [0,1]$
+    using a gradient from cyan ($i=0$, \texttt{\#00DDFF}) to orange ($i=1$,
+    \texttt{\#FF8800}). Any object parameterized by $i$ should inherit this gradient.
+  \item \textbf{Transport path}: The arc from $A(i_0)$ to $A(i_1)$ should be
+    gradient-colored along its length, making it clear which end is the source and
+    which is the target.
+  \item \textbf{Composition square}: The square face being filled should use a 2D
+    gradient: $i$-axis (horizontal) and $j$-axis (vertical) each contribute a
+    color channel, so the entire face reads as a color map of $(i, j) \in [0,1]^2$.
+  \item \textbf{Morphing fibers in Transport}: As the type family $A$ deforms, the
+    geometry should be colored with a gradient that tracks \emph{how far along the
+    path} we are — the color encodes $i$ continuously so the viewer can see the
+    transition is smooth, not a teleport.
+  \item \textbf{Kan filling lid}: The lid being filled should be colored with a
+    radial gradient emanating from the edges (where data is given) toward the
+    center (where it is being computed), suggesting that the fill ``spreads inward''
+    from known boundary data.
+\end{itemize}
+
+In Three.js this is achieved with \texttt{BufferGeometry} vertex colors
+(\texttt{geometry.setAttribute('color', ...)}) combined with
+\texttt{vertexColors: true} on \texttt{MeshBasicMaterial}. For line objects,
+\texttt{LineBasicMaterial} supports vertex colors equally well.
+
 \subsection{Camera Presets}
 
 For each rule, define 2--3 \emph{camera presets} (top view, front view, isometric)
@@ -295,6 +327,7 @@ auto-orbit leaves the scene at an unhelpful angle.
 \textbf{Item} & \textbf{Impact} & \textbf{Effort} & \textbf{Priority} \\
 \midrule
 Color consistency across rules & Medium & Low & \textbf{High} \\
+Gradient colors for continuous transforms & High & Low & \textbf{High} \\
 Axis labels with dimension variables & Medium & Low & \textbf{High} \\
 URL hash routing & Low & Low & \textbf{High} \\
 Composition as square fill & High & Medium & \textbf{High} \\
