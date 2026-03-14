@@ -17,9 +17,9 @@
     name: "Kan Filling - Completing the Box",
     judgment: `
       <div class="nd-rule">
-        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A')} \\quad ${km('\\Gamma \\vdash \\varphi : \\mathbb{F}')} \\quad ${km('\\Gamma,\\, \\varphi,\\, i : \\mathbb{I} \\vdash u : A')} \\quad ${km('\\Gamma \\vdash a_0 : A(i_0)[\\varphi \\mapsto u(i_0)]')}</div>
+        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A \\quad \\Gamma \\vdash \\varphi : \\mathbb{F} \\quad \\Gamma,\\, \\varphi,\\, i : \\mathbb{I} \\vdash u : A \\quad \\Gamma \\vdash a_0 : A(i_0)[\\varphi \\mapsto u(i_0)]')}</div>
         <hr class="nd-line">
-        <div class="nd-conclusion">${kd('\\Gamma \\vdash \\mathrm{fill}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0 : \\mathrm{Path}\\,(\\lambda j \\to A(j)[\\varphi \\mapsto u(j)])\\, a_0\\, (\\mathrm{comp}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0)')}</div>
+        <div class="nd-conclusion">${km('\\Gamma \\vdash \\mathrm{fill}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0 : \\mathrm{Path}\\,(\\lambda j \\to A(j)[\\varphi \\mapsto u(j)])\\, a_0\\, (\\mathrm{comp}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0)')}</div>
       </div>
     `,
     description: "Given an open box (5 faces), construct the missing lid. The fill operation gives us a path from the base to the composition.",

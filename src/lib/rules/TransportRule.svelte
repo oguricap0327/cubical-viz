@@ -24,9 +24,9 @@
     name: "Transport - Coercion Along Paths",
     judgment: `
       <div class="nd-rule">
-        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A')} \\quad ${km('\\Gamma \\vdash a : A(i_0)')}</div>
+        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A \\quad \\Gamma \\vdash a : A(i_0)')}</div>
         <hr class="nd-line">
-        <div class="nd-conclusion">${kd('\\Gamma \\vdash \\mathrm{transp}^i\\, A\\, a : A(i_1)')}</div>
+        <div class="nd-conclusion">${km('\\Gamma \\vdash \\mathrm{transp}^i\\, A\\, a : A(i_1)')}</div>
       </div>
     `,
     description: `Transport moves an element along a path in a type family. It's a special case of composition: ${km('\\mathrm{transp}^i\\, A\\, a = \\mathrm{comp}^i\\, A\\, [\\,]\\, a')}`,

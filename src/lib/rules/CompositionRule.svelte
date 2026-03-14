@@ -24,9 +24,9 @@
     name: "Composition - The Heart of Cubical",
     judgment: `
       <div class="nd-rule">
-        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A')} \\quad ${km('\\Gamma \\vdash \\varphi : \\mathbb{F}')} \\quad ${km('\\Gamma,\\, \\varphi,\\, i : \\mathbb{I} \\vdash u : A')} \\quad ${km('\\Gamma \\vdash a_0 : A(i_0)[\\varphi \\mapsto u(i_0)]')}</div>
+        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A \\quad \\Gamma \\vdash \\varphi : \\mathbb{F} \\quad \\Gamma,\\, \\varphi,\\, i : \\mathbb{I} \\vdash u : A \\quad \\Gamma \\vdash a_0 : A(i_0)[\\varphi \\mapsto u(i_0)]')}</div>
         <hr class="nd-line">
-        <div class="nd-conclusion">${kd('\\Gamma \\vdash \\mathrm{comp}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0 : A(i_1)[\\varphi \\mapsto u(i_1)]')}</div>
+        <div class="nd-conclusion">${km('\\Gamma \\vdash \\mathrm{comp}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0 : A(i_1)[\\varphi \\mapsto u(i_1)]')}</div>
       </div>
     `,
     description: `Being extensible is preserved along paths: if a partial path is extensible at ${km('i=0')}, then it is extensible at ${km('i=1')}.`,

@@ -18,9 +18,9 @@
     name: "Glue Types and Univalence",
     judgment: `
       <div class="nd-rule">
-        <div class="nd-premises">${km('\\Gamma \\vdash \\varphi : \\mathbb{F}')} \\quad ${km('\\Gamma,\\, \\varphi \\vdash T : \\mathrm{Type}')} \\quad ${km('\\Gamma,\\, \\varphi \\vdash e : T \\simeq A')}</div>
+        <div class="nd-premises">${km('\\Gamma \\vdash \\varphi : \\mathbb{F} \\quad \\Gamma,\\, \\varphi \\vdash T : \\mathrm{Type} \\quad \\Gamma,\\, \\varphi \\vdash e : T \\simeq A')}</div>
         <hr class="nd-line">
-        <div class="nd-conclusion">${kd('\\Gamma \\vdash \\mathrm{Glue}[\\varphi \\mapsto (T, e)]\\, A : \\mathrm{Type}')}</div>
+        <div class="nd-conclusion">${km('\\Gamma \\vdash \\mathrm{Glue}[\\varphi \\mapsto (T, e)]\\, A : \\mathrm{Type}')}</div>
         <div style="margin-top: 8px; font-style: italic;">${km('\\text{Univalence: } (A \\simeq B) \\simeq (A = B)')}</div>
       </div>
     `,
