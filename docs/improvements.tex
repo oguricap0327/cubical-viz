@@ -1,0 +1,332 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{fontenc}
+\usepackage{inputenc}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!70!black,
+}
+
+\definecolor{cubblue}{RGB}{68, 136, 255}
+\definecolor{cuborange}{RGB}{255, 170, 68}
+\definecolor{cubgreen}{RGB}{68, 255, 136}
+\definecolor{cubpink}{RGB}{255, 68, 136}
+
+\title{
+  \vspace{-1cm}
+  \textbf{Cubical Type Theory Visualizer} \\
+  \large Design Improvements \& Conceptual Clarity Roadmap
+}
+\author{Oguri Cap \\ \small cubical-viz project}
+\date{March 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document proposes a set of improvements to the \texttt{cubical-viz} interactive
+visualizer for cubical type theory. We identify conceptual gaps in the current
+visualizations, suggest richer visual encodings, and outline new features that would
+make the tool substantially more useful for learning and research. The proposals are
+organized from quick wins to longer-term ideas.
+\end{abstract}
+
+\tableofcontents
+\vspace{1em}
+
+% ────────────────────────────────────────────────────────────────────────────
+\section{Current State}
+% ────────────────────────────────────────────────────────────────────────────
+
+The visualizer currently shows five concepts:
+\begin{enumerate}
+  \item \textbf{Path Types} — A path as a function $\mathbb{I} \to A$.
+  \item \textbf{Composition} — Filling a square from three faces.
+  \item \textbf{Transport} — Coercing an element along a path in a type family.
+  \item \textbf{Kan Filling} — Constructing the missing lid of an open box.
+  \item \textbf{Glue Types} — Gluing types via equivalences to prove univalence.
+\end{enumerate}
+
+Each rule has a KaTeX-rendered typing judgment, a prose description, a Three.js 3D
+animation, and bidirectional hover highlighting between judgment terms and 3D
+objects. The visual style is flat (\texttt{MeshBasicMaterial}), clean, and dark-themed.
+
+% ────────────────────────────────────────────────────────────────────────────
+\section{Conceptual Gaps to Address}
+% ────────────────────────────────────────────────────────────────────────────
+
+\subsection{The Interval $\mathbb{I}$ Is Under-Explained}
+
+The interval is the foundation of everything, but its special status as a
+\emph{non-inductive} primitive with face lattice $\{0, 1, i, 1-i, \ldots\}$ is not
+conveyed. The current interval visualization is a static line with endpoints $i_0$
+and $i_1$. This misses several key ideas:
+
+\begin{itemize}
+  \item The \emph{de Morgan algebra} structure: $i \land j$, $i \lor j$, $1-i$.
+  \item The distinction between \emph{internal} (the interval object $\mathbb{I}$)
+    and \emph{external} (the meta-level of terms).
+  \item Face maps: substituting $0$ or $1$ for $i$ corresponds to selecting
+    endpoints; this should be visually interactive (drag a point along the line and
+    watch the fiber change).
+\end{itemize}
+
+\paragraph{Proposed fix.} Animate a point sliding along the interval and show a
+\emph{fiber} — a copy of the type $A(i)$ — changing as $i$ moves. Use color to
+encode the value of $i \in [0,1]$.
+
+\subsection{Composition Needs a ``Box'' Not Just an Arc}
+
+Currently, Composition is shown as an arc animation. The key intuition is that
+composition \emph{fills a square}: given three sides (two paths and a connecting
+path at $i=0$), we get the fourth side. The 3D scene should show a literal square
+with three sides drawn and one side being animated in.
+
+\begin{itemize}
+  \item Draw a unit square $[0,1]^2$ in 3D space.
+  \item Color the three \emph{given} edges in distinct colors corresponding to
+    $u_0$, $u_1$, and $p$ (the base path).
+  \item Animate the fourth edge (the composition) being filled from $i=0$ to $i=1$.
+  \item The formula $\mathrm{comp}^i\,A\,[i=0 \mapsto u_0, i=1 \mapsto u_1]\,p$
+    should map directly onto the visual.
+\end{itemize}
+
+\subsection{Transport Should Show the Fiber Changing}
+
+Transport moves an element along a path in a \emph{type family}. The current
+visualization shows two spheres (for $A(i_0)$ and $A(i_1)$) with a path arc
+between them. This is correct but loses the key idea that $A$ is a
+\emph{varying} family: the type itself changes as $i$ moves.
+
+\begin{itemize}
+  \item Show the path $A : \mathbb{I} \to \mathcal{U}$ as a \emph{sequence of
+    shapes morphing} across the screen (e.g., a sphere deforming into a torus).
+  \item Show the element $a : A(i_0)$ sitting inside the left fiber, and
+    $\mathrm{transp}^i\,A\,a : A(i_1)$ appearing in the right fiber.
+  \item Animate the element \emph{moving through the deforming fibers} as $i$
+    increases from $0$ to $1$.
+\end{itemize}
+
+\subsection{Kan Filling: Clarify ``Open Box'' vs.\ ``Filled Box''}
+
+The current animation fades in the top face. The term \emph{Kan filling} comes from
+Kan complexes in simplicial set theory, and the key visual is an \emph{open box}
+(five faces of a cube) with the \emph{missing lid} that gets filled.
+
+\begin{itemize}
+  \item The box should start visibly \emph{open} at the top --- not just with an
+    invisible face but with clearly missing edges.
+  \item The \emph{face formula} $\varphi$ should be visualized: $\varphi$ encodes
+    \emph{which} faces are given. Draw $\varphi$ as a highlighted subset of faces.
+  \item Animate the lid ``snapping in'' or being ``extruded'' from the partial data,
+    not just fading in.
+  \item The partial element $u$ (the system of given faces) should be individually
+    highlighted and hoverable.
+\end{itemize}
+
+\subsection{Glue Types: Equivalence Is Not a Path}
+
+The current GlueType visualization draws an arc from type $A$ (a sphere) to type
+$B$ (a torus) and animates a point sliding along it. This looks like \emph{transport
+along a path}, not an \emph{equivalence}. An equivalence $e : T \simeq A$ is a pair
+of maps with homotopy inverses, which is fundamentally different.
+
+\begin{itemize}
+  \item Replace the arc with \emph{two arrows} going in both directions ($f : T \to
+    A$ and $g : A \to T$) to emphasize the bijectivity.
+  \item Show a point in $A$ mapped to $B$ and back, ending at the same point
+    (homotopy inverse visualization).
+  \item The \emph{Glue} type should be shown as a \emph{blend} or \emph{overlap
+    region} between $A$ and $T$, not just a path connecting them.
+  \item Add an annotation for the face formula $\varphi$: when $\varphi = 1$,
+    we are entirely in $T$; when $\varphi = 0$, we are in $A$.
+\end{itemize}
+
+% ────────────────────────────────────────────────────────────────────────────
+\section{Visual Design Improvements}
+% ────────────────────────────────────────────────────────────────────────────
+
+\subsection{Color Consistency Across Rules}
+
+Currently each rule invents its own color palette. A consistent scheme would help
+the user build intuition across pages.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Concept} & \textbf{Suggested Color} & \textbf{Hex} \\
+\midrule
+Interval / time dimension & Cyan & \texttt{\#44DDFF} \\
+Type family $A$ & Blue & \texttt{\#4488FF} \\
+Starting element / base point & Yellow & \texttt{\#FFDD44} \\
+Result / transported element & Orange & \texttt{\#FF8844} \\
+Partial data / face formula & Green & \texttt{\#44FF88} \\
+Composition / fill result & Pink & \texttt{\#FF44AA} \\
+Equivalence arrow & Purple & \texttt{\#AA44FF} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Dimension Labels on Axes}
+
+The 3D scene has no axis labels. Users cannot tell which axis corresponds to which
+dimension variable ($i$, $j$, $k$). Add thin labeled axes:
+\begin{itemize}
+  \item $i$-axis: horizontal (red), labeled ``$i : \mathbb{I}$''.
+  \item $j$-axis: vertical (green), labeled ``$j : \mathbb{I}$''.
+  \item $k$-axis: depth (blue), labeled ``$k : \mathbb{I}$''.
+\end{itemize}
+These should be toggleable (press \texttt{A} for axes).
+
+\subsection{Step-by-Step Mode}
+
+The rules have sequential structure that autonomous animation loses.
+For example, Kan filling has three stages: (1) show the open box, (2) show the
+given data $[\varphi \mapsto u]$, (3) fill the lid. A ``step'' button would let
+users pause at each conceptual stage, with a text callout explaining what just
+happened.
+
+\subsection{Proof Relevance: Show the Witness}
+
+For rules like Composition and Transport, the \emph{proof term} (the witness) is as
+important as the judgment. Consider rendering the term in a ``proof tree'' panel
+alongside the 3D view:
+
+\begin{itemize}
+  \item Split the content area: left = 3D scene (60\%), right = proof tree (40\%).
+  \item The proof tree uses KaTeX and collapses/expands nodes.
+  \item Hovering a node in the proof tree highlights the corresponding object in
+    3D; the existing hover system already supports this pattern.
+\end{itemize}
+
+% ────────────────────────────────────────────────────────────────────────────
+\section{New Concepts to Add}
+% ────────────────────────────────────────────────────────────────────────────
+
+\subsection{Path Concatenation and Inversion}
+
+Before composition (which is the general $n$-dimensional operation), show the
+simpler 1D cases:
+\begin{itemize}
+  \item \textbf{Concatenation}: $p \cdot q$ where $p : a = b$ and $q : b = c$.
+    Show as two line segments being joined end-to-end.
+  \item \textbf{Inversion}: $p^{-1} : b = a$.
+    Show as the path being ``reversed'' (arrow flips direction).
+  \item \textbf{Reflexivity}: $\mathrm{refl}_a : a = a$.
+    Show as a degenerate constant path.
+\end{itemize}
+
+\subsection{Higher-Dimensional Paths}
+
+The square and cube primitives exist but are not connected to their type-theoretic
+meaning. Add pages for:
+\begin{itemize}
+  \item \textbf{Square}: A term $p : \mathrm{Path}\,(\mathrm{Path}\,A\,a\,b)\,q\,r$
+    as a square face with all four edges labeled.
+  \item \textbf{Cube}: A 3-dimensional path as a solid with labeled faces showing
+    the coherence conditions.
+\end{itemize}
+
+\subsection{The Face Lattice $\mathbb{F}$}
+
+The face formula type $\mathbb{F}$ is used in Composition, Kan filling, and Glue
+types but never visualized. A dedicated page showing:
+\begin{itemize}
+  \item The Hasse diagram of $\mathbb{F}$ as a lattice.
+  \item Interactive toggle: click a face of a cube and see the corresponding formula.
+  \item The meet/join operations $\varphi \land \psi$, $\varphi \lor \psi$.
+\end{itemize}
+
+\subsection{Univalence Proof via Glue}
+
+The classical proof of univalence in cubical type theory uses Glue types. Walking
+through this proof interactively would be a flagship feature:
+\begin{enumerate}
+  \item Start with an equivalence $e : A \simeq B$.
+  \item Construct $\mathrm{Glue}\,[i=0 \mapsto (A, e)]\,B$.
+  \item Show that the resulting type gives a path $A = B$ in $\mathcal{U}$.
+  \item Animate the passage through the four corners of a square in the universe.
+\end{enumerate}
+
+% ────────────────────────────────────────────────────────────────────────────
+\section{UX and Navigation}
+% ────────────────────────────────────────────────────────────────────────────
+
+\subsection{Dependency Graph View}
+
+The sidebar currently lists rules as a flat categorized list. Adding a
+\textbf{dependency graph view} (toggle-able) would show how concepts build on each
+other:
+\[
+  \mathbb{I} \;\longrightarrow\; \text{Path Type} \;\longrightarrow\; \text{Transport} \;\longrightarrow\; \text{Composition} \;\longrightarrow\; \text{Kan Filling} \;\longrightarrow\; \text{Glue Types}
+\]
+Clicking a node in the graph navigates to that rule. Edges should be labeled with
+the dependency relationship.
+
+\subsection{URL-Based Deep Linking}
+
+Currently the visualizer always starts at the Interval page. Adding URL hash routing
+(e.g.\ \texttt{/cubical-viz/\#transport-rule}) would allow linking directly to a
+specific rule, making it useful for sharing in papers or lecture notes.
+
+\subsection{Camera Presets}
+
+For each rule, define 2--3 \emph{camera presets} (top view, front view, isometric)
+that the user can jump to with keyboard shortcuts (1, 2, 3). This helps when the
+auto-orbit leaves the scene at an unhelpful angle.
+
+% ────────────────────────────────────────────────────────────────────────────
+\section{Priority Summary}
+% ────────────────────────────────────────────────────────────────────────────
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+\textbf{Item} & \textbf{Impact} & \textbf{Effort} & \textbf{Priority} \\
+\midrule
+Color consistency across rules & Medium & Low & \textbf{High} \\
+Axis labels with dimension variables & Medium & Low & \textbf{High} \\
+URL hash routing & Low & Low & \textbf{High} \\
+Composition as square fill & High & Medium & \textbf{High} \\
+Transport with morphing fibers & High & Medium & \textbf{High} \\
+Step-by-step mode & High & Medium & Medium \\
+Glue types: bidirectional arrows & Medium & Medium & Medium \\
+Kan filling: face formula $\varphi$ visual & Medium & Medium & Medium \\
+Proof tree panel & High & High & Medium \\
+Path concatenation / inversion pages & Medium & Medium & Medium \\
+Face lattice $\mathbb{F}$ page & High & High & Low \\
+Univalence proof walkthrough & Very High & Very High & Low \\
+Dependency graph navigation & Medium & High & Low \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ────────────────────────────────────────────────────────────────────────────
+\section{Conclusion}
+% ────────────────────────────────────────────────────────────────────────────
+
+The most impactful short-term improvements are:
+\begin{enumerate}
+  \item Fixing Composition to show an actual square being filled (not just an arc).
+  \item Making Transport show the \emph{varying type family} as morphing geometry.
+  \item Establishing a consistent color vocabulary so users can read across rules.
+  \item Adding axis labels so spatial dimensions map clearly to interval variables.
+\end{enumerate}
+
+These four changes would make the tool substantially more informative for someone
+learning cubical type theory. The longer-term additions (univalence proof walkthrough,
+face lattice, proof trees) would make it genuinely useful as a pedagogical companion
+to papers like CCHM (Cohen--Coquand--Huber--M\"ortberg) or the HoTT book's cubical
+chapter.
+
+\end{document}
