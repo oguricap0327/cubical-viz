@@ -12,6 +12,7 @@
   import PathInvRule from './lib/rules/PathInvRule.svelte';
   import SquareRule from './lib/rules/SquareRule.svelte';
   import CubeRule from './lib/rules/CubeRule.svelte';
+  import FaceLattice from './lib/FaceLattice.svelte';
   import { type VisualizationType, VISUALIZATIONS } from './lib/types';
 
   const validIds = new Set<string>(Object.keys(VISUALIZATIONS));
@@ -80,6 +81,8 @@
     current === 'path-concat-rule' ||
     current === 'path-inv-rule'
   );
+
+  let isStandalone = $derived(current === 'face-lattice');
 </script>
 
 <main>
@@ -88,7 +91,13 @@
 
   <!-- Content area, offset by sidebar width -->
   <div class="content">
-    {#if isRuleBased}
+    {#if isStandalone}
+      {#key current}
+        {#if current === 'face-lattice'}
+          <FaceLattice />
+        {/if}
+      {/key}
+    {:else if isRuleBased}
       {#key current}
         {#if current === 'interval'}
           <IntervalRule />

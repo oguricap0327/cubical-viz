@@ -11,7 +11,8 @@ export type VisualizationType =
   | 'kan-filling-rule'
   | 'glue-type-rule'
   | 'path-concat-rule'
-  | 'path-inv-rule';
+  | 'path-inv-rule'
+  | 'face-lattice';
 
 export interface VisualizationInfo {
   label: string;
@@ -90,6 +91,11 @@ export const VISUALIZATIONS: Record<VisualizationType, VisualizationInfo> = {
     icon: '⁻¹',
     description: 'Path inversion - reversing the direction of a path',
   },
+  'face-lattice': {
+    label: 'Face Lattice',
+    icon: '⊓',
+    description: 'The face lattice 𝔽 governing partial elements',
+  },
 };
 
 export const NAV_CATEGORIES: NavCategory[] = [
@@ -100,6 +106,10 @@ export const NAV_CATEGORIES: NavCategory[] = [
   {
     title: 'Operations',
     items: ['composition', 'transport'],
+  },
+  {
+    title: 'Theory',
+    items: ['face-lattice'],
   },
   {
     title: 'Typing Rules',
