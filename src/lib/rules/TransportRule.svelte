@@ -11,6 +11,44 @@
   const kt = (f: string, key: string) =>
     `<span class="term-hover" data-term="${key}">${km(f)}</span>`;
 
+  /** Create a geometry that morphs between a sphere (t=0) and an icosahedron (t=1). */
+  function createFiberGeometry(t: number, radius: number): THREE.BufferGeometry {
+    if (t <= 0) return new THREE.SphereGeometry(radius, 24, 24);
+    if (t >= 1) return new THREE.IcosahedronGeometry(radius, 1);
+
+    const sphere = new THREE.SphereGeometry(radius, 24, 24);
+    const ico = new THREE.IcosahedronGeometry(radius, 1);
+
+    // Morph sphere vertices toward icosahedron by projecting onto the ico surface
+    const sPos = sphere.attributes.position;
+    const iPos = ico.attributes.position;
+    const icoVerts: THREE.Vector3[] = [];
+    for (let i = 0; i < iPos.count; i++) {
+      icoVerts.push(new THREE.Vector3(iPos.getX(i), iPos.getY(i), iPos.getZ(i)));
+    }
+
+    for (let i = 0; i < sPos.count; i++) {
+      const sv = new THREE.Vector3(sPos.getX(i), sPos.getY(i), sPos.getZ(i));
+      // Find nearest ico vertex and lerp toward it
+      let nearest = icoVerts[0];
+      let minDist = sv.distanceToSquared(nearest);
+      for (let j = 1; j < icoVerts.length; j++) {
+        const d = sv.distanceToSquared(icoVerts[j]);
+        if (d < minDist) { minDist = d; nearest = icoVerts[j]; }
+      }
+      sv.lerp(nearest, t * 0.6);
+      sPos.setXYZ(i, sv.x, sv.y, sv.z);
+    }
+    sPos.needsUpdate = true;
+    sphere.computeVertexNormals();
+    return sphere;
+  }
+
+  const FIBER_COUNT = 5;
+  const FIBER_POSITIONS = [0, 0.25, 0.5, 0.75, 1.0]; // i-values
+  const X_MIN = -2, X_MAX = 2;
+  const FIBER_RADIUS = 0.4;
+
   const transportRule: RuleDefinition = {
     name: "Transport - Coercion Along Paths",
     judgment: `
@@ -24,68 +62,64 @@
     
     setup: (scene: THREE.Scene, camera: THREE.Camera) => {
       const group = new THREE.Group();
-      
-      // A(i0) - sphere (type family)
-      const sphereGeometry = new THREE.SphereGeometry(0.3, 32, 32);
-      const sphereMaterial = new THREE.MeshStandardMaterial({
-        color: TYPE_FAMILY,
-        transparent: true,
-        opacity: 0.7,
-        wireframe: true,
-      });
-      const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-      sphere.position.set(-1, 0, 0);
-      group.add(sphere);
-      
-      // A(i1) - torus (result)
-      const torusGeometry = new THREE.TorusGeometry(0.3, 0.12, 16, 32);
-      const torusMaterial = new THREE.MeshStandardMaterial({
-        color: RESULT,
-        transparent: true,
-        opacity: 0.7,
-        wireframe: true,
-      });
-      const torus = new THREE.Mesh(torusGeometry, torusMaterial);
-      torus.position.set(1, 0, 0);
-      group.add(torus);
-      
-      // Path arc with vertex-color gradient: INTERVAL (cyan) → RESULT (orange)
+      const typeColor = new THREE.Color(TYPE_FAMILY);
+      const resultColor = new THREE.Color(RESULT);
+      const fiberMeshes: THREE.Mesh[] = [];
+
+      // Create 5 fiber shapes morphing from sphere (i=0) to icosahedron (i=1)
+      for (let fi = 0; fi < FIBER_COUNT; fi++) {
+        const t = FIBER_POSITIONS[fi];
+        const x = X_MIN + t * (X_MAX - X_MIN);
+        const geom = createFiberGeometry(t, FIBER_RADIUS);
+        const fiberColor = new THREE.Color().copy(typeColor).lerp(resultColor, t);
+        const mat = new THREE.MeshStandardMaterial({
+          color: fiberColor,
+          transparent: true,
+          opacity: 0.55,
+          wireframe: true,
+        });
+        const mesh = new THREE.Mesh(geom, mat);
+        mesh.position.set(x, 0, 0);
+        group.add(mesh);
+        fiberMeshes.push(mesh);
+      }
+
+      const fiberI0 = fiberMeshes[0];
+      const fiberI1 = fiberMeshes[FIBER_COUNT - 1];
+
+      // Gradient arc connecting fibers: INTERVAL (cyan) → RESULT (orange)
       const pathCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-1, 0, 0),
-        new THREE.Vector3(-0.5, 0.3, 0.1),
-        new THREE.Vector3(0, 0.4, 0),
-        new THREE.Vector3(0.5, 0.3, -0.1),
-        new THREE.Vector3(1, 0, 0),
+        new THREE.Vector3(X_MIN, 0, 0),
+        new THREE.Vector3(X_MIN * 0.5, 0.5, 0.15),
+        new THREE.Vector3(0, 0.7, 0),
+        new THREE.Vector3(X_MAX * 0.5, 0.5, -0.15),
+        new THREE.Vector3(X_MAX, 0, 0),
       ]);
 
-      const pathPoints = pathCurve.getPoints(50);
+      const pathPoints = pathCurve.getPoints(80);
       const pathGeometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
-
       const intervalColor = new THREE.Color(INTERVAL);
-      const resultColor = new THREE.Color(RESULT);
+      const arcEndColor = new THREE.Color(RESULT);
       const vertexColors = new Float32Array(pathPoints.length * 3);
       const tmpColor = new THREE.Color();
       for (let i = 0; i < pathPoints.length; i++) {
         const t = i / (pathPoints.length - 1);
-        tmpColor.copy(intervalColor).lerp(resultColor, t);
+        tmpColor.copy(intervalColor).lerp(arcEndColor, t);
         vertexColors[i * 3] = tmpColor.r;
         vertexColors[i * 3 + 1] = tmpColor.g;
         vertexColors[i * 3 + 2] = tmpColor.b;
       }
       pathGeometry.setAttribute('color', new THREE.BufferAttribute(vertexColors, 3));
-
-      const pathMaterial = new THREE.LineBasicMaterial({
-        vertexColors: true,
-        linewidth: 2,
-      });
+      const pathMaterial = new THREE.LineBasicMaterial({ vertexColors: true, linewidth: 2 });
       const pathLine = new THREE.Line(pathGeometry, pathMaterial);
       group.add(pathLine);
       
-      // Element 'a' (base point)
-      const elementGeometry = new THREE.SphereGeometry(0.08, 16, 16);
+      // Moving element 'a' — glowing yellow dot
+      const elementGeometry = new THREE.SphereGeometry(0.12, 16, 16);
       const elementMaterial = new THREE.MeshStandardMaterial({
         color: BASE_POINT,
-        emissive: 0xaa8800,
+        emissive: BASE_POINT,
+        emissiveIntensity: 0.6,
       });
       const element = new THREE.Mesh(elementGeometry, elementMaterial);
       element.position.copy(pathCurve.getPointAt(0));
@@ -93,22 +127,22 @@
       
       // Labels
       const labelA0 = createTextSprite('A(i₀)', hexCss(TYPE_FAMILY));
-      labelA0.position.set(-1, -0.5, 0);
+      labelA0.position.set(X_MIN, -0.7, 0);
       labelA0.scale.set(0.3, 0.3, 0.3);
       group.add(labelA0);
       
       const labelA1 = createTextSprite('A(i₁)', hexCss(RESULT));
-      labelA1.position.set(1, -0.5, 0);
+      labelA1.position.set(X_MAX, -0.7, 0);
       labelA1.scale.set(0.3, 0.3, 0.3);
       group.add(labelA1);
       
       const labelElement = createTextSprite('a', hexCss(BASE_POINT));
-      labelElement.position.set(-1, 0.4, 0);
+      labelElement.position.set(X_MIN, 0.6, 0);
       labelElement.scale.set(0.25, 0.25, 0.25);
       group.add(labelElement);
       
       const labelTransport = createTextSprite('transp a', hexCss(BASE_POINT));
-      labelTransport.position.set(1, 0.4, 0);
+      labelTransport.position.set(X_MAX, 0.6, 0);
       labelTransport.scale.set(0.25, 0.25, 0.25);
       group.add(labelTransport);
       
@@ -119,14 +153,15 @@
       (scene as any)._element = element;
       (scene as any)._pathCurve = pathCurve;
       (scene as any)._labelElement = labelElement;
+      (scene as any)._fiberMeshes = fiberMeshes;
 
-      // Populate term mappings for hover highlighting
+      // Term mappings for hover highlighting
       transportRule.termMappings = [
         { termKey: 'a', objects: [element] },
-        { termKey: 'A', objects: [pathLine] },
-        { termKey: 'A_i0', objects: [sphere] },
-        { termKey: 'A_i1', objects: [torus] },
-        { termKey: 'transp_a', objects: [element, torus] },
+        { termKey: 'A', objects: [...fiberMeshes] },
+        { termKey: 'A_i0', objects: [fiberI0] },
+        { termKey: 'A_i1', objects: [fiberI1] },
+        { termKey: 'transp_a', objects: [pathLine] },
       ];
     },
     
@@ -134,17 +169,28 @@
       const scene = (window as any)._currentScene;
       if (!scene) return;
       
-      const element = (scene as any)._element;
-      const pathCurve = (scene as any)._pathCurve;
+      const element = (scene as any)._element as THREE.Mesh | undefined;
+      const pathCurve = (scene as any)._pathCurve as THREE.CatmullRomCurve3 | undefined;
       const labelElement = (scene as any)._labelElement;
+      const fiberMeshes = (scene as any)._fiberMeshes as THREE.Mesh[] | undefined;
       
       if (element && pathCurve) {
+        // Smooth oscillation from i=0 to i=1
         const t = (Math.sin(time * 0.5) + 1) / 2;
         const pos = pathCurve.getPointAt(t);
         element.position.copy(pos);
         
         if (labelElement) {
-          labelElement.position.set(pos.x, pos.y + 0.4, pos.z);
+          labelElement.position.set(pos.x, pos.y + 0.5, pos.z);
+        }
+      }
+
+      // Gentle breathing rotation on fibers
+      if (fiberMeshes) {
+        for (let i = 0; i < fiberMeshes.length; i++) {
+          const mesh = fiberMeshes[i];
+          mesh.rotation.y = time * 0.3 + i * 0.5;
+          mesh.rotation.x = Math.sin(time * 0.2 + i) * 0.15;
         }
       }
     },
