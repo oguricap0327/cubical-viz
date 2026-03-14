@@ -8,6 +8,7 @@
   import { createScene } from '../three/scene';
   import { hoveredTerm } from '../hoverState';
   import StepPanel from '../controls/StepPanel.svelte';
+  import AxisGizmo from '../three/AxisGizmo.svelte';
   import type { Snippet } from 'svelte';
 
   let { rule, controls }: { rule: RuleDefinition; controls?: Snippet } = $props();
@@ -252,6 +253,9 @@
 
   <div class="visualization">
     <canvas bind:this={canvas}></canvas>
+    {#if camera}
+      <AxisGizmo {camera} />
+    {/if}
   </div>
 
   {#if controls}

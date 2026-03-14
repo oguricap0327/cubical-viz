@@ -3,7 +3,6 @@
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
   import { createTextSprite } from '../textSprite';
-  import { createAxes } from '../three/axes';
   import { BASE_POINT, PARTIAL_DATA, FILL_RESULT, hexCss } from '../colors';
   import katex from 'katex';
 
@@ -96,13 +95,10 @@
       labelComp.scale.set(0.25, 0.25, 0.25);
       group.add(labelComp);
 
-      const axes = createAxes(scene);
-
       scene.add(group);
 
       // Store references for animation
       (scene as any)._compositionGroup = group;
-      (scene as any)._axes = axes;
       (scene as any)._topEdge = topEdge;
       (scene as any)._dot = dot;
 
@@ -139,8 +135,6 @@
     cleanup: (scene: THREE.Scene) => {
       const group = (scene as any)._compositionGroup;
       if (group) scene.remove(group);
-      const axes = (scene as any)._axes;
-      if (axes) scene.remove(axes);
     },
 
     steps: [

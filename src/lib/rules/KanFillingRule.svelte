@@ -2,7 +2,6 @@
   import Rule from './Rule.svelte';
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
-  import { createAxes } from '../three/axes';
   import { BASE_POINT, PARTIAL_DATA, FILL_RESULT } from '../colors';
   import katex from 'katex';
 
@@ -117,12 +116,9 @@
       const positions = topGeometry.attributes.position.array as Float32Array;
       const originalPositions = new Float32Array(positions);
 
-      const axes = createAxes(scene);
-
       scene.add(group);
 
       (scene as any)._kanGroup = group;
-      (scene as any)._axes = axes;
       (scene as any)._kanTopPositions = positions;
       (scene as any)._kanOriginalPositions = originalPositions;
       (scene as any)._kanTopGeometry = topGeometry;
@@ -163,8 +159,6 @@
     cleanup: (scene: THREE.Scene) => {
       const group = (scene as any)._kanGroup;
       if (group) scene.remove(group);
-      const axes = (scene as any)._axes;
-      if (axes) scene.remove(axes);
     }
   };
 </script>

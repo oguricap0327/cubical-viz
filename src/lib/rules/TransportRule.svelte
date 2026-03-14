@@ -3,7 +3,6 @@
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
   import { createTextSprite } from '../textSprite';
-  import { createAxes } from '../three/axes';
   import { INTERVAL, TYPE_FAMILY, BASE_POINT, RESULT, hexCss } from '../colors';
   import katex from 'katex';
 
@@ -147,13 +146,10 @@
       labelTransport.scale.set(0.25, 0.25, 0.25);
       group.add(labelTransport);
       
-      const axes = createAxes(scene);
-
       scene.add(group);
       
       // Store references for animation
       (scene as any)._transportGroup = group;
-      (scene as any)._axes = axes;
       (scene as any)._element = element;
       (scene as any)._pathCurve = pathCurve;
       (scene as any)._labelElement = labelElement;
@@ -204,8 +200,6 @@
     cleanup: (scene: THREE.Scene) => {
       const group = (scene as any)._transportGroup;
       if (group) scene.remove(group);
-      const axes = (scene as any)._axes;
-      if (axes) scene.remove(axes);
     },
 
     steps: [

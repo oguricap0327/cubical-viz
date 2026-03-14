@@ -3,7 +3,6 @@
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
   import { createTextSprite } from '../textSprite';
-  import { createAxes } from '../three/axes';
   import { TYPE_FAMILY, RESULT, EQUIVALENCE, BASE_POINT, hexCss } from '../colors';
   import katex from 'katex';
 
@@ -127,11 +126,9 @@
       labelG.position.set(0, -1.4, 0);
       group.add(labelG);
 
-      const axes = createAxes(scene);
       scene.add(group);
 
       (scene as any)._glueGroup = group;
-      (scene as any)._axes = axes;
       (scene as any)._glueDot = dot;
       (scene as any)._glueTopCurve = topCurve;
       (scene as any)._glueBottomCurve = bottomCurve;
@@ -179,8 +176,6 @@
     cleanup: (scene: THREE.Scene) => {
       const group = (scene as any)._glueGroup;
       if (group) scene.remove(group);
-      const axes = (scene as any)._axes;
-      if (axes) scene.remove(axes);
     }
   };
 </script>
