@@ -20,14 +20,17 @@
 
   // Track original materials for highlight restore
   const originalEmissives = new Map<THREE.Object3D, { color: THREE.Color; intensity: number }>();
+  const originalColors = new Map<THREE.Object3D, THREE.Color>();
 
   function saveOriginals(objects: THREE.Object3D[]) {
     for (const obj of objects) {
-      if (originalEmissives.has(obj)) continue;
       const mesh = obj as THREE.Mesh;
-      const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
-      if (mat && 'emissive' in mat) {
+      const mat = mesh.material as any;
+      if (!mat) continue;
+      if ('emissive' in mat && !originalEmissives.has(obj)) {
         originalEmissives.set(obj, { color: mat.emissive.clone(), intensity: mat.emissiveIntensity });
+      } else if ('color' in mat && !originalColors.has(obj)) {
+        originalColors.set(obj, mat.color.clone());
       }
     }
   }
@@ -35,11 +38,14 @@
   function applyHighlight(objects: THREE.Object3D[]) {
     for (const obj of objects) {
       const mesh = obj as THREE.Mesh;
-      const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
-      if (mat && 'emissive' in mat) {
-        saveOriginals([obj]);
+      const mat = mesh.material as any;
+      if (!mat) continue;
+      saveOriginals([obj]);
+      if ('emissive' in mat) {
         mat.emissive.set(0xffdc50);
         mat.emissiveIntensity = 1.5;
+      } else if ('color' in mat) {
+        mat.color.set(0xffdc50);
       }
     }
   }
@@ -47,11 +53,17 @@
   function clearHighlight(objects: THREE.Object3D[]) {
     for (const obj of objects) {
       const mesh = obj as THREE.Mesh;
-      const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
-      const orig = originalEmissives.get(obj);
-      if (mat && 'emissive' in mat && orig) {
-        mat.emissive.copy(orig.color);
-        mat.emissiveIntensity = orig.intensity;
+      const mat = mesh.material as any;
+      if (!mat) continue;
+      const origEmissive = originalEmissives.get(obj);
+      if ('emissive' in mat && origEmissive) {
+        mat.emissive.copy(origEmissive.color);
+        mat.emissiveIntensity = origEmissive.intensity;
+      } else {
+        const origColor = originalColors.get(obj);
+        if ('color' in mat && origColor) {
+          mat.color.copy(origColor);
+        }
       }
     }
   }
