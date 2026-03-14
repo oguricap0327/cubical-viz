@@ -3,13 +3,28 @@
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
   import { createTextSprite } from '../textSprite';
-  import { INTERVAL, BASE_POINT, PARTIAL_DATA, FILL_RESULT, hexCss } from '../colors';
+  import { BASE_POINT, PARTIAL_DATA, FILL_RESULT, hexCss } from '../colors';
   import katex from 'katex';
 
   const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
   const kd = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: true });
   const kt = (f: string, key: string) =>
     `<span class="term-hover" data-term="${key}">${km(f)}</span>`;
+
+  const SQ = 1.4; // unit square side length
+  const HALF = SQ / 2;
+
+  // Square corners (XY plane, centered at origin)
+  const BL = new THREE.Vector3(-HALF, -HALF, 0); // bottom-left
+  const BR = new THREE.Vector3( HALF, -HALF, 0); // bottom-right
+  const TL = new THREE.Vector3(-HALF,  HALF, 0); // top-left
+  const TR = new THREE.Vector3( HALF,  HALF, 0); // top-right
+
+  function makeEdge(a: THREE.Vector3, b: THREE.Vector3, color: number): THREE.Line {
+    const geo = new THREE.BufferGeometry().setFromPoints([a, b]);
+    const mat = new THREE.LineBasicMaterial({ color, linewidth: 3 });
+    return new THREE.Line(geo, mat);
+  }
 
   const compositionRule: RuleDefinition = {
     name: "Composition - The Heart of Cubical",
@@ -21,103 +36,102 @@
       </div>
     `,
     description: `Being extensible is preserved along paths: if a partial path is extensible at ${km('i=0')}, then it is extensible at ${km('i=1')}.`,
-    
-    setup: (scene: THREE.Scene, camera: THREE.Camera) => {
-      const group = new THREE.Group();
-      
-      const boxSize = 1.2;
-      
-      // Base face (at i=0) - base point
-      const baseGeometry = new THREE.PlaneGeometry(boxSize, boxSize);
-      const baseMaterial = new THREE.MeshStandardMaterial({
-        color: BASE_POINT,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.7,
-      });
-      const base = new THREE.Mesh(baseGeometry, baseMaterial);
-      base.position.set(0, -boxSize/2, 0);
-      base.rotation.x = -Math.PI / 2;
-      group.add(base);
-      
-      // Partial side faces (extent φ) - partial data
-      const sideGeometry = new THREE.PlaneGeometry(boxSize, boxSize);
-      const sideMaterial = new THREE.MeshStandardMaterial({
-        color: PARTIAL_DATA,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.6,
-      });
-      
-      const leftSide = new THREE.Mesh(sideGeometry, sideMaterial);
-      leftSide.position.set(-boxSize/2, 0, 0);
-      leftSide.rotation.y = Math.PI / 2;
-      group.add(leftSide);
-      
-      const rightSide = new THREE.Mesh(sideGeometry, sideMaterial);
-      rightSide.position.set(boxSize/2, 0, 0);
-      rightSide.rotation.y = -Math.PI / 2;
-      group.add(rightSide);
-      
-      // Lid face (at i=1) - fill result, initially hidden
-      const lidGeometry = new THREE.PlaneGeometry(boxSize, boxSize);
-      const lidMaterial = new THREE.MeshStandardMaterial({
-        color: FILL_RESULT,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0,
-      });
-      const lid = new THREE.Mesh(lidGeometry, lidMaterial);
-      lid.position.set(0, boxSize/2, 0);
-      lid.rotation.x = Math.PI / 2;
-      group.add(lid);
-      
-      // Wireframe edges (interval)
-      const edgesGeometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(boxSize, boxSize, boxSize));
-      const edgesMaterial = new THREE.LineBasicMaterial({ color: INTERVAL, linewidth: 2 });
-      const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-      group.add(edges);
-      
-      // Labels
-      const baseLabel = createTextSprite('a₀ (base)', hexCss(BASE_POINT));
-      baseLabel.position.set(0, -boxSize/2 - 0.3, 0);
-      baseLabel.scale.set(0.3, 0.3, 0.3);
-      group.add(baseLabel);
-      
-      const sideLabel = createTextSprite('u (sides)', hexCss(PARTIAL_DATA));
-      sideLabel.position.set(-boxSize/2 - 0.4, 0, 0);
-      sideLabel.scale.set(0.3, 0.3, 0.3);
-      group.add(sideLabel);
-      
-      const lidLabel = createTextSprite('comp (lid)', hexCss(FILL_RESULT));
-      lidLabel.position.set(0, boxSize/2 + 0.3, 0);
-      lidLabel.scale.set(0.3, 0.3, 0.3);
-      group.add(lidLabel);
-      
-      scene.add(group);
-      
-      (scene as any)._compositionGroup = group;
-      (scene as any)._lid = lid;
 
-      // Populate term mappings for hover highlighting
+    setup: (scene: THREE.Scene, _camera: THREE.Camera) => {
+      const group = new THREE.Group();
+
+      // --- Static edges (given data) ---
+      const bottomEdge = makeEdge(BL, BR, PARTIAL_DATA);  // a₀ base path
+      const leftEdge   = makeEdge(BL, TL, BASE_POINT);    // u₀ (i=0 face)
+      const rightEdge  = makeEdge(BR, TR, FILL_RESULT);   // u₁ (i=1 face)
+      group.add(bottomEdge, leftEdge, rightEdge);
+
+      // --- Animated top edge (composition result) ---
+      const topSegments = 64;
+      const topPositions = new Float32Array((topSegments + 1) * 3);
+      const topColors    = new Float32Array((topSegments + 1) * 3);
+      const baseColor   = new THREE.Color(BASE_POINT);
+      const resultColor = new THREE.Color(FILL_RESULT);
+      const tmpColor    = new THREE.Color();
+
+      for (let i = 0; i <= topSegments; i++) {
+        const frac = i / topSegments;
+        // positions initialised to top-left (will be updated in animate)
+        topPositions[i * 3]     = TL.x + frac * (TR.x - TL.x);
+        topPositions[i * 3 + 1] = TL.y;
+        topPositions[i * 3 + 2] = 0;
+        // gradient colour
+        tmpColor.copy(baseColor).lerp(resultColor, frac);
+        topColors[i * 3]     = tmpColor.r;
+        topColors[i * 3 + 1] = tmpColor.g;
+        topColors[i * 3 + 2] = tmpColor.b;
+      }
+
+      const topGeo = new THREE.BufferGeometry();
+      topGeo.setAttribute('position', new THREE.BufferAttribute(topPositions, 3));
+      topGeo.setAttribute('color',    new THREE.BufferAttribute(topColors, 3));
+      const topMat = new THREE.LineBasicMaterial({ vertexColors: true, linewidth: 3 });
+      const topEdge = new THREE.Line(topGeo, topMat);
+      group.add(topEdge);
+
+      // Moving dot that traces the top edge
+      const dotGeo = new THREE.SphereGeometry(0.06, 16, 16);
+      const dotMat = new THREE.MeshStandardMaterial({
+        color: FILL_RESULT,
+        emissive: 0xcc2288,
+      });
+      const dot = new THREE.Mesh(dotGeo, dotMat);
+      dot.position.copy(TL);
+      group.add(dot);
+
+      // --- Labels ---
+      const labelA0 = createTextSprite('a₀', hexCss(PARTIAL_DATA));
+      labelA0.position.set(BL.x - 0.15, BL.y - 0.2, 0);
+      labelA0.scale.set(0.25, 0.25, 0.25);
+      group.add(labelA0);
+
+      const labelComp = createTextSprite('comp', hexCss(FILL_RESULT));
+      labelComp.position.set(TR.x + 0.2, TR.y + 0.15, 0);
+      labelComp.scale.set(0.25, 0.25, 0.25);
+      group.add(labelComp);
+
+      scene.add(group);
+
+      // Store references for animation
+      (scene as any)._compositionGroup = group;
+      (scene as any)._topEdge = topEdge;
+      (scene as any)._dot = dot;
+
+      // Term mappings for hover highlighting
       compositionRule.termMappings = [
-        { termKey: 'a0', objects: [base] },
-        { termKey: 'u', objects: [leftSide, rightSide] },
-        { termKey: 'comp', objects: [lid] },
+        { termKey: 'a0',   objects: [bottomEdge] },
+        { termKey: 'u',    objects: [leftEdge, rightEdge] },
+        { termKey: 'comp', objects: [topEdge, dot] },
       ];
     },
-    
+
     update: (time: number) => {
       const scene = (window as any)._currentScene;
       if (!scene) return;
-      
-      const lid = (scene as any)._lid;
-      if (lid) {
-        const t = (Math.sin(time * 0.5) + 1) / 2;
-        lid.material.opacity = t * 0.7;
-      }
+
+      const topEdge = (scene as any)._topEdge as THREE.Line | undefined;
+      const dot     = (scene as any)._dot as THREE.Mesh | undefined;
+      if (!topEdge || !dot) return;
+
+      // t sweeps 0→1 using a sin-based loop
+      const t = (Math.sin(time * 0.5) + 1) / 2;
+
+      // Update the top edge draw range so only the portion 0..t is visible
+      const posAttr = topEdge.geometry.getAttribute('position') as THREE.BufferAttribute;
+      const segments = posAttr.count - 1;
+      const drawCount = Math.max(2, Math.floor(t * segments) + 1);
+      topEdge.geometry.setDrawRange(0, drawCount);
+
+      // Move the dot to the leading point of the top edge
+      const dx = TR.x - TL.x;
+      dot.position.set(TL.x + t * dx, TL.y, 0);
     },
-    
+
     cleanup: (scene: THREE.Scene) => {
       const group = (scene as any)._compositionGroup;
       if (group) {
@@ -125,7 +139,7 @@
       }
     }
   };
-  
+
 </script>
 
 <Rule rule={compositionRule} />
