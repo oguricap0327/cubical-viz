@@ -9,6 +9,12 @@
   let timeValue = $state(0);
   let playing = $state(true);
   let manualControl = $state(false);
+  
+  // Start animation on mount
+  $effect(() => {
+    playing = true;
+    manualControl = false;
+  });
 
   const compositionRule: RuleDefinition = {
     name: "Composition - The Heart of Cubical",
