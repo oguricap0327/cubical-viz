@@ -3,24 +3,12 @@
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
   import { createTextSprite } from '../textSprite';
-  import Slider from '../controls/Slider.svelte';
-  import PlayPause from '../controls/PlayPause.svelte';
   import katex from 'katex';
 
   const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
   const kd = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: true });
   const kt = (f: string, key: string) =>
     `<span class="term-hover" data-term="${key}">${km(f)}</span>`;
-
-  let timeValue = $state(0);
-  let playing = $state(true);
-  let manualControl = $state(false);
-  
-  // Start animation on mount
-  $effect(() => {
-    playing = true;
-    manualControl = false;
-  });
 
   const compositionRule: RuleDefinition = {
     name: "Composition - The Heart of Cubical",
@@ -124,12 +112,8 @@
       
       const lid = (scene as any)._lid;
       if (lid) {
-        const t = manualControl ? timeValue : (Math.sin(time * 0.5) + 1) / 2;
+        const t = (Math.sin(time * 0.5) + 1) / 2;
         lid.material.opacity = t * 0.7;
-        
-        if (!manualControl && playing) {
-          timeValue = t;
-        }
       }
     },
     
@@ -141,46 +125,6 @@
     }
   };
   
-  // Store scene reference for update function
-  $effect(() => {
-    return () => {
-      (window as any)._currentScene = null;
-    };
-  });
-
-  function handleSliderChange(value: number) {
-    timeValue = value;
-    manualControl = true;
-  }
-
-  function handlePlayPause(isPlaying: boolean) {
-    playing = isPlaying;
-    if (isPlaying) {
-      manualControl = false;
-    }
-  }
 </script>
 
-<Rule rule={compositionRule}>
-  {#snippet controls()}
-    <div class="controls-container">
-      <PlayPause {playing} onToggle={handlePlayPause} />
-      <Slider 
-        bind:value={timeValue}
-        min={0}
-        max={1}
-        step={0.01}
-        label="Filling Progress (i)"
-        onChange={handleSliderChange}
-      />
-    </div>
-  {/snippet}
-</Rule>
-
-<style>
-  .controls-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-</style>
+<Rule rule={compositionRule} />

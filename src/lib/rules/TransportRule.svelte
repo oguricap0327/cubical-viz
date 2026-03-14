@@ -3,24 +3,12 @@
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
   import { createTextSprite } from '../textSprite';
-  import Slider from '../controls/Slider.svelte';
-  import PlayPause from '../controls/PlayPause.svelte';
   import katex from 'katex';
 
   const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
   const kd = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: true });
   const kt = (f: string, key: string) =>
     `<span class="term-hover" data-term="${key}">${km(f)}</span>`;
-
-  let timeValue = $state(0);
-  let playing = $state(true);
-  let manualControl = $state(false);
-  
-  // Start animation on mount
-  $effect(() => {
-    playing = true;
-    manualControl = false;
-  });
 
   const transportRule: RuleDefinition = {
     name: "Transport - Coercion Along Paths",
@@ -135,16 +123,12 @@
       const labelElement = (scene as any)._labelElement;
       
       if (element && pathCurve) {
-        const t = manualControl ? timeValue : (Math.sin(time * 0.5) + 1) / 2;
+        const t = (Math.sin(time * 0.5) + 1) / 2;
         const pos = pathCurve.getPointAt(t);
         element.position.copy(pos);
         
         if (labelElement) {
           labelElement.position.set(pos.x, pos.y + 0.4, pos.z);
-        }
-        
-        if (!manualControl && playing) {
-          timeValue = t;
         }
       }
     },
@@ -157,39 +141,6 @@
     }
   };
 
-  function handleSliderChange(value: number) {
-    timeValue = value;
-    manualControl = true;
-  }
-
-  function handlePlayPause(isPlaying: boolean) {
-    playing = isPlaying;
-    if (isPlaying) {
-      manualControl = false;
-    }
-  }
 </script>
 
-<Rule rule={transportRule}>
-  {#snippet controls()}
-    <div class="controls-container">
-      <PlayPause {playing} onToggle={handlePlayPause} />
-      <Slider 
-        bind:value={timeValue}
-        min={0}
-        max={1}
-        step={0.01}
-        label="Transport Progress (i)"
-        onChange={handleSliderChange}
-      />
-    </div>
-  {/snippet}
-</Rule>
-
-<style>
-  .controls-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-</style>
+<Rule rule={transportRule} />
