@@ -24,12 +24,17 @@
     description: "Path concatenation joins two paths end-to-end: first traverse p, then q. This witnesses transitivity of path equality.",
 
     setup: (scene: THREE.Scene, _camera: THREE.Camera) => {
+      // Position camera to see the full triangle
+      const cam = _camera as THREE.PerspectiveCamera;
+      cam.position.set(0, -0.2, 10);
+      cam.lookAt(0, -0.2, 0);
+
       const group = new THREE.Group();
 
       // Triangle vertex positions
-      const posA = new THREE.Vector3(-2, -1.2, 0);
-      const posB = new THREE.Vector3(0, 1.5, 0);
-      const posC = new THREE.Vector3(2, -1.2, 0);
+      const posA = new THREE.Vector3(-2, -0.8, 0);
+      const posB = new THREE.Vector3(0, 1.0, 0);
+      const posC = new THREE.Vector3(2, -0.8, 0);
 
       // Point spheres
       const sphereA = new THREE.Mesh(
@@ -55,13 +60,13 @@
 
       // Quadratic Bezier curves
       const curveP = new THREE.QuadraticBezierCurve3(
-        posA, new THREE.Vector3(-1.5, 0.5, 1.2), posB
+        posA, new THREE.Vector3(-1.5, 0.5, 0.8), posB
       );
       const curveQ = new THREE.QuadraticBezierCurve3(
-        posB, new THREE.Vector3(1.5, 0.5, 1.2), posC
+        posB, new THREE.Vector3(1.5, 0.5, 0.8), posC
       );
       const curvePQ = new THREE.QuadraticBezierCurve3(
-        posA, new THREE.Vector3(0, -0.5, 1.8), posC
+        posA, new THREE.Vector3(0, -1.2, 0.8), posC
       );
 
       // Build a line with vertex-color gradient along a curve
