@@ -32,10 +32,7 @@ export function createScene(options: SceneOptions = {}): THREE.Scene {
   const ambientLight = new THREE.AmbientLight(ambientLightColor, ambientLightIntensity);
   scene.add(ambientLight);
 
-  // Add point light
-  const pointLight = new THREE.PointLight(pointLightColor, pointLightIntensity, 50);
-  pointLight.position.set(...pointLightPosition);
-  scene.add(pointLight);
+  // No point light — avoids specular reflections on objects
 
   // Add grid helper
   if (addGrid) {
