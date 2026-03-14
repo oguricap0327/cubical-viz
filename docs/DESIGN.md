@@ -218,3 +218,57 @@ A learner should be able to:
 ---
 
 **Note:** This is a long-term project. We'll build incrementally, one rule at a time, ensuring each visualization is pedagogically valuable before moving to the next.
+
+---
+
+## Implementation Plan (v2 — March 2026)
+
+See `improvements.pdf` for the full design rationale. Tasks in priority order:
+
+### Completed ✅
+- All 5 rules with KaTeX judgments and 3D visualizations
+- Bidirectional hover highlighting (3D ↔ typing rule terms)
+- Autonomous looping animations, no progress bar controls
+- Consistent dark theme, MeshBasicMaterial (flat shading)
+- Ambient light tuned to intensity 2.0
+
+### Task 1 — Color vocabulary + gradient colors
+- Create `src/lib/colors.ts` with semantic color constants
+- Apply consistently across all 5 rules
+- Add vertex-color gradient to Transport arc (cyan → orange along i)
+- Add gradient to Interval primitive line
+
+### Task 2 — Composition: square fill
+- Replace arc animation with a literal unit square
+- Three given edges drawn in distinct colors; fourth edge animated in
+- Maps directly to: `comp^i A [i=0 ↦ u₀, i=1 ↦ u₁] p`
+
+### Task 3 — Transport: morphing fibers
+- Show type family A as deforming geometry across the path
+- Element moves through continuously changing fiber
+- Gradient color encodes position along i
+
+### Task 4 — Axis labels (i/j/k)
+- Thin labeled axes in each 3D scene
+- Toggle with keyboard shortcut A
+
+### Task 5 — Glue types: bidirectional equivalence arrows
+- Replace arc with two arrows f: T→A and g: A→T
+- Show round-trip animation (homotopy inverse)
+
+### Task 6 — URL hash routing
+- Deep link to specific rules: `/cubical-viz/#transport-rule`
+
+### Task 7 — Step-by-step mode
+- Pause points with explanatory text callouts at each conceptual stage
+
+### Color vocabulary (semantic)
+| Concept | Color | Hex |
+|---------|-------|-----|
+| Interval / i-dimension | Cyan | `#44DDFF` |
+| Type family A | Blue | `#4488FF` |
+| Base point / a₀ | Yellow | `#FFDD44` |
+| Result / transported | Orange | `#FF8844` |
+| Partial data / φ | Green | `#44FF88` |
+| Fill / composition result | Pink | `#FF44AA` |
+| Equivalence | Purple | `#AA44FF` |

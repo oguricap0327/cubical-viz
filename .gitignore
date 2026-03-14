@@ -33,3 +33,13 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Finder (MacOS) folder config
 .DS_Store
 docs/tmp/
+
+# LaTeX intermediate files
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
