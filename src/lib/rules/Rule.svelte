@@ -18,7 +18,7 @@
   let canvas: HTMLCanvasElement;
   let ruleHeader: HTMLDivElement;
   let scene: THREE.Scene;
-  let camera: THREE.PerspectiveCamera;
+  let camera: THREE.PerspectiveCamera | undefined = $state(undefined);
   let renderer: THREE.WebGLRenderer;
   let orbitControls: ReturnType<typeof createOrbitControls>;
 
