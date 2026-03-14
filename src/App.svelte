@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Scene from './lib/Scene.svelte';
   import Controls from './lib/Controls.svelte';
+  import IntervalRule from './lib/rules/IntervalRule.svelte';
   import PathTypeRule from './lib/rules/PathTypeRule.svelte';
   import CompositionRule from './lib/rules/CompositionRule.svelte';
   import TransportRule from './lib/rules/TransportRule.svelte';
@@ -55,6 +56,7 @@
   });
 
   let isRuleBased = $derived(
+    current === 'interval' ||
     current === 'path-type-rule' ||
     current === 'composition-rule' ||
     current === 'transport-rule' ||
@@ -71,7 +73,9 @@
   <div class="content">
     {#if isRuleBased}
       {#key current}
-        {#if current === 'path-type-rule'}
+        {#if current === 'interval'}
+          <IntervalRule />
+        {:else if current === 'path-type-rule'}
           <PathTypeRule />
         {:else if current === 'composition-rule'}
           <CompositionRule />
