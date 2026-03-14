@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import Scene from './lib/Scene.svelte';
   import Controls from './lib/Controls.svelte';
   import PathTypeRule from './lib/rules/PathTypeRule.svelte';
@@ -8,7 +9,50 @@
   import GlueTypeRule from './lib/rules/GlueTypeRule.svelte';
   import { type VisualizationType, VISUALIZATIONS } from './lib/types';
 
-  let current: VisualizationType = $state('interval');
+  const validIds = new Set<string>(Object.keys(VISUALIZATIONS));
+
+  function parseHash(): VisualizationType | null {
+    const id = window.location.hash.replace(/^#/, '');
+    return validIds.has(id) ? (id as VisualizationType) : null;
+  }
+
+  let current: VisualizationType = $state(parseHash() ?? 'interval');
+
+  // Track whether the change came from a user sidebar click
+  let userClick = false;
+
+  function handleSelect(v: VisualizationType) {
+    userClick = true;
+    current = v;
+  }
+
+  // Sync hash whenever current changes
+  $effect(() => {
+    const hash = '#' + current;
+    if (window.location.hash !== hash) {
+      if (userClick) {
+        window.history.pushState(null, '', hash);
+      } else {
+        window.history.replaceState(null, '', hash);
+      }
+    }
+    userClick = false;
+  });
+
+  // Browser back/forward support
+  function onPopState() {
+    const id = parseHash();
+    if (id) current = id;
+  }
+
+  onMount(() => {
+    window.addEventListener('popstate', onPopState);
+    // Set initial hash if absent
+    if (!window.location.hash) {
+      window.history.replaceState(null, '', '#' + current);
+    }
+    return () => window.removeEventListener('popstate', onPopState);
+  });
 
   let isRuleBased = $derived(
     current === 'path-type-rule' ||
@@ -21,7 +65,7 @@
 
 <main>
   <!-- Always-visible categorized sidebar -->
-  <Controls selected={current} onSelect={(v) => (current = v)} />
+  <Controls selected={current} onSelect={handleSelect} />
 
   <!-- Content area, offset by sidebar width -->
   <div class="content">
