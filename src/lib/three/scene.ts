@@ -16,7 +16,7 @@ export function createScene(options: SceneOptions = {}): THREE.Scene {
   const {
     backgroundColor = 0x1a1a2e,
     ambientLightColor = 0xffffff,
-    ambientLightIntensity = 0.6,
+    ambientLightIntensity = 2.0,
     pointLightColor = 0xffffff,
     pointLightIntensity = 1.2,
     pointLightPosition = [2, 3, 4],
