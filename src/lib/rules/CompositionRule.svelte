@@ -114,7 +114,7 @@
       ];
     },
 
-    update: (time: number) => {
+    update: (time: number, elapsed?: number) => {
       const scene = (window as any)._currentScene;
       if (!scene) return;
 
@@ -122,8 +122,8 @@
       const dot     = (scene as any)._dot as THREE.Mesh | undefined;
       if (!topEdge || !dot) return;
 
-      // t sweeps 0→1 using a sin-based loop
-      const t = (Math.sin(time * 0.5) + 1) / 2;
+      // When elapsed is provided, time is already a normalized t in [0,1]
+      const t = elapsed !== undefined ? time : (Math.sin(time * 0.5) + 1) / 2;
 
       // Update the top edge draw range so only the portion 0..t is visible
       const posAttr = topEdge.geometry.getAttribute('position') as THREE.BufferAttribute;
@@ -141,7 +141,25 @@
       if (group) scene.remove(group);
       const axes = (scene as any)._axes;
       if (axes) scene.remove(axes);
-    }
+    },
+
+    steps: [
+      {
+        label: 'Given edges',
+        description: 'Three edges of the square are given: the base path a₀ and two partial paths u.',
+        timeRange: [0, 0.05],
+      },
+      {
+        label: 'Filling',
+        description: 'The composition fills the missing top edge, sweeping from left to right.',
+        timeRange: [0.05, 0.95],
+      },
+      {
+        label: 'Result',
+        description: 'compⁱ A [φ ↦ u] a₀ : A(i₁) — the composed path lives in the fiber at i=1.',
+        timeRange: [0.95, 1.0],
+      },
+    ],
   };
 
 </script>

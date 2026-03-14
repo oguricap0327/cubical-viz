@@ -169,7 +169,7 @@
       ];
     },
     
-    update: (time: number) => {
+    update: (time: number, elapsed?: number) => {
       const scene = (window as any)._currentScene;
       if (!scene) return;
       
@@ -179,8 +179,9 @@
       const fiberMeshes = (scene as any)._fiberMeshes as THREE.Mesh[] | undefined;
       
       if (element && pathCurve) {
-        // Smooth oscillation from i=0 to i=1
-        const t = (Math.sin(time * 0.5) + 1) / 2;
+        // When elapsed is provided, time is already a normalized t in [0,1]
+        const t = elapsed !== undefined ? time : (Math.sin(time * 0.5) + 1) / 2;
+        const rawTime = elapsed ?? time;
         const pos = pathCurve.getPointAt(t);
         element.position.copy(pos);
         
@@ -191,10 +192,11 @@
 
       // Gentle breathing rotation on fibers
       if (fiberMeshes) {
+        const rawTime = elapsed ?? time;
         for (let i = 0; i < fiberMeshes.length; i++) {
           const mesh = fiberMeshes[i];
-          mesh.rotation.y = time * 0.3 + i * 0.5;
-          mesh.rotation.x = Math.sin(time * 0.2 + i) * 0.15;
+          mesh.rotation.y = rawTime * 0.3 + i * 0.5;
+          mesh.rotation.x = Math.sin(rawTime * 0.2 + i) * 0.15;
         }
       }
     },
@@ -204,7 +206,25 @@
       if (group) scene.remove(group);
       const axes = (scene as any)._axes;
       if (axes) scene.remove(axes);
-    }
+    },
+
+    steps: [
+      {
+        label: 'Type family',
+        description: 'A : I → Type is a path in the universe — a continuously varying type.',
+        timeRange: [0, 0.1],
+      },
+      {
+        label: 'Base element',
+        description: 'a : A(i₀) is an element sitting in the fiber at i=0.',
+        timeRange: [0.1, 0.4],
+      },
+      {
+        label: 'Transport',
+        description: 'transpⁱ A a coerces a through the family, landing in A(i₁).',
+        timeRange: [0.4, 1.0],
+      },
+    ],
   };
 
 </script>

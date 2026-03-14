@@ -7,9 +7,12 @@
   import { createRenderer, updateRendererSize } from '../three/renderer';
   import { createScene } from '../three/scene';
   import { hoveredTerm } from '../hoverState';
+  import StepPanel from '../controls/StepPanel.svelte';
   import type { Snippet } from 'svelte';
 
   let { rule, controls }: { rule: RuleDefinition; controls?: Snippet } = $props();
+
+  let activeStep = $state(0);
 
   let canvas: HTMLCanvasElement;
   let ruleHeader: HTMLDivElement;
@@ -171,10 +174,22 @@
 
     function animate() {
       animationId = requestAnimationFrame(animate);
-      const time = clock.getElapsedTime();
+      const elapsed = clock.getElapsedTime();
 
       if (rule.update) {
-        rule.update(time);
+        if (rule.steps) {
+          // When steps are active, compute normalized t within the step's timeRange
+          const step = rule.steps[activeStep];
+          const [lo, hi] = step.timeRange;
+          const raw = (Math.sin(elapsed * 0.5) + 1) / 2; // oscillates 0..1
+          const t = lo + raw * (hi - lo);
+          // Pass negative elapsed time as a flag that t is pre-computed,
+          // followed by raw elapsed for secondary effects (rotation).
+          // Convention: rule.update receives the pre-mapped t value directly.
+          rule.update(t, elapsed);
+        } else {
+          rule.update(elapsed);
+        }
       }
 
       orbitControls.update();
@@ -230,6 +245,10 @@
     </div>
     <p class="rule-description">{@html rule.description}</p>
   </div>
+
+  {#if rule.steps}
+    <StepPanel steps={rule.steps} bind:activeStep />
+  {/if}
 
   <div class="visualization">
     <canvas bind:this={canvas}></canvas>

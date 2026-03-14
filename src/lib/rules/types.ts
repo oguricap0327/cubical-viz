@@ -5,15 +5,22 @@ export interface TermMapping {
   objects: THREE.Object3D[];  // 3D objects to highlight
 }
 
+export interface StepDefinition {
+  label: string;
+  description: string;
+  timeRange: [number, number];
+}
+
 export interface RuleDefinition {
   name: string;
   judgment: string; // HTML string with typing judgment
   description: string;
   setup: (scene: THREE.Scene, camera: THREE.Camera) => void;
-  update?: (time: number) => void;
+  update?: (time: number, elapsed?: number) => void;
   cleanup?: (scene: THREE.Scene) => void;
   controls?: any; // Svelte component for interactive controls
   termMappings?: TermMapping[];  // populated after setup()
+  steps?: StepDefinition[];
 }
 
 export interface RuleVisualization {
