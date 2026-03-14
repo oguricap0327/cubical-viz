@@ -5,6 +5,9 @@
   import { createTextSprite } from '../textSprite';
   import Slider from '../controls/Slider.svelte';
   import PlayPause from '../controls/PlayPause.svelte';
+  import katex from 'katex';
+
+  const km = (f: string) => katex.renderToString(f, { throwOnError: false });
 
   let timeValue = $state(0);
   let playing = $state(true);
@@ -25,7 +28,7 @@
         <div>Γ ⊢ transp<sup>i</sup> A a : A(i₁)</div>
       </div>
     `,
-    description: "Transport moves an element along a path in a type family. It's a special case of composition: transp^i A a = comp^i A [] a",
+    description: `Transport moves an element along a path in a type family. It's a special case of composition: ${km('\\mathrm{transp}^i\\, A\\, a = \\mathrm{comp}^i\\, A\\, [\\,]\\, a')}`,
     
     setup: (scene: THREE.Scene, camera: THREE.Camera) => {
       const group = new THREE.Group();

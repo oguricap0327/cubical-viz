@@ -5,6 +5,9 @@
   import { createTextSprite } from '../textSprite';
   import Slider from '../controls/Slider.svelte';
   import PlayPause from '../controls/PlayPause.svelte';
+  import katex from 'katex';
+
+  const km = (f: string) => katex.renderToString(f, { throwOnError: false });
 
   let timeValue = $state(0);
   let playing = $state(true);
@@ -31,7 +34,7 @@
         </div>
       </div>
     `,
-    description: "Being extensible is preserved along paths: if a partial path is extensible at i=0, then it is extensible at i=1.",
+    description: `Being extensible is preserved along paths: if a partial path is extensible at ${km('i=0')}, then it is extensible at ${km('i=1')}.`,
     
     setup: (scene: THREE.Scene, camera: THREE.Camera) => {
       const group = new THREE.Group();

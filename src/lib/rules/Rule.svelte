@@ -75,7 +75,7 @@
     <div class="rule-judgment">
       {@html rule.judgment}
     </div>
-    <p class="rule-description">{rule.description}</p>
+    <p class="rule-description">{@html rule.description}</p>
   </div>
 
   <div class="visualization">

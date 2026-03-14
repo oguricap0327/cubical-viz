@@ -3,6 +3,9 @@
   import type { RuleDefinition } from './types';
   import { createInterval } from '../createInterval';
   import * as THREE from 'three';
+  import katex from 'katex';
+
+  const km = (f: string) => katex.renderToString(f, { throwOnError: false });
 
   const pathTypeRule: RuleDefinition = {
     name: "Path Types - Introduction",
@@ -13,7 +16,7 @@
         <div>Γ ⊢ ⟨i⟩ t : Path<sub>A</sub> t(i₀) t(i₁)</div>
       </div>
     `,
-    description: "A path is a function from the interval 𝕀 to a type A. The interval has two endpoints: i₀ (zero) and i₁ (one).",
+    description: `A path is a function from the interval 𝕀 to a type A. The interval has two endpoints: ${km('i_0')} (zero) and ${km('i_1')} (one).`,
     
     setup: (scene: THREE.Scene, camera: THREE.Camera) => {
       // Create the interval visualization
