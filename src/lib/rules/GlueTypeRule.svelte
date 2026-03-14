@@ -5,6 +5,10 @@
   import { createTextSprite } from '../textSprite';
   import Slider from '../controls/Slider.svelte';
   import PlayPause from '../controls/PlayPause.svelte';
+  import katex from 'katex';
+
+  const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
+  const kd = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: true });
 
   let timeValue = $state(0);
   let playing = $state(true);
@@ -13,17 +17,11 @@
   const glueTypeRule: RuleDefinition = {
     name: "Glue Types and Univalence",
     judgment: `
-      <div style="font-size: 0.85rem; line-height: 1.8;">
-        <div style="margin-bottom: 5px;">
-          Γ ⊢ φ : F &nbsp;&nbsp; Γ, φ ⊢ T : Type &nbsp;&nbsp; Γ, φ ⊢ e : T ≃ A
-        </div>
-        <div style="border-top: 2px solid #88ccff; margin: 5px 40px;"></div>
-        <div style="text-align: center;">
-          Γ ⊢ Glue[φ ↦ (T, e)] A : Type
-        </div>
-        <div style="margin-top: 10px; text-align: center; font-style: italic;">
-          Univalence: (A ≃ B) ≃ (A = B)
-        </div>
+      <div class="nd-rule">
+        <div class="nd-premises">${km('\\Gamma \\vdash \\varphi : \\mathbb{F}')} \\quad ${km('\\Gamma,\\, \\varphi \\vdash T : \\mathrm{Type}')} \\quad ${km('\\Gamma,\\, \\varphi \\vdash e : T \\simeq A')}</div>
+        <hr class="nd-line">
+        <div class="nd-conclusion">${kd('\\Gamma \\vdash \\mathrm{Glue}[\\varphi \\mapsto (T, e)]\\, A : \\mathrm{Type}')}</div>
+        <div style="margin-top: 8px; font-style: italic;">${km('\\text{Univalence: } (A \\simeq B) \\simeq (A = B)')}</div>
       </div>
     `,
     description: "Glue types allow us to 'glue' types together along equivalences. Univalence says that equivalent types are equal.",

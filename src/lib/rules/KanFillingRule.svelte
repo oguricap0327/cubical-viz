@@ -4,6 +4,10 @@
   import * as THREE from 'three';
   import Slider from '../controls/Slider.svelte';
   import PlayPause from '../controls/PlayPause.svelte';
+  import katex from 'katex';
+
+  const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
+  const kd = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: true });
 
   let timeValue = $state(0);
   let playing = $state(true);
@@ -12,16 +16,10 @@
   const kanFillingRule: RuleDefinition = {
     name: "Kan Filling - Completing the Box",
     judgment: `
-      <div style="font-size: 0.85rem; line-height: 1.8;">
-        <div style="margin-bottom: 5px;">
-          Γ, i : 𝕀 ⊢ A &nbsp;&nbsp; Γ ⊢ φ : F &nbsp;&nbsp; 
-          Γ, φ, i : 𝕀 ⊢ u : A &nbsp;&nbsp; 
-          Γ ⊢ a₀ : A(i₀)[φ ↦ u(i₀)]
-        </div>
-        <div style="border-top: 2px solid #88ccff; margin: 5px 40px;"></div>
-        <div style="text-align: center;">
-          Γ ⊢ fill<sup>i</sup> A [φ ↦ u] a₀ : Path (λ j → A(j)[φ ↦ u(j)]) a₀ (comp<sup>i</sup> A [φ ↦ u] a₀)
-        </div>
+      <div class="nd-rule">
+        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash A')} \\quad ${km('\\Gamma \\vdash \\varphi : \\mathbb{F}')} \\quad ${km('\\Gamma,\\, \\varphi,\\, i : \\mathbb{I} \\vdash u : A')} \\quad ${km('\\Gamma \\vdash a_0 : A(i_0)[\\varphi \\mapsto u(i_0)]')}</div>
+        <hr class="nd-line">
+        <div class="nd-conclusion">${kd('\\Gamma \\vdash \\mathrm{fill}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0 : \\mathrm{Path}\\,(\\lambda j \\to A(j)[\\varphi \\mapsto u(j)])\\, a_0\\, (\\mathrm{comp}^i\\, A\\, [\\varphi \\mapsto u]\\, a_0)')}</div>
       </div>
     `,
     description: "Given an open box (5 faces), construct the missing lid. The fill operation gives us a path from the base to the composition.",

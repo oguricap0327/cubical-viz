@@ -5,15 +5,16 @@
   import * as THREE from 'three';
   import katex from 'katex';
 
-  const km = (f: string) => katex.renderToString(f, { throwOnError: false });
+  const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
+  const kd = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: true });
 
   const pathTypeRule: RuleDefinition = {
     name: "Path Types - Introduction",
     judgment: `
-      <div style="text-align: center;">
-        <div style="margin-bottom: 5px;">Γ, i : 𝕀 ⊢ t : A</div>
-        <div style="border-top: 2px solid #88ccff; margin: 5px 20px;"></div>
-        <div>Γ ⊢ ⟨i⟩ t : Path<sub>A</sub> t(i₀) t(i₁)</div>
+      <div class="nd-rule">
+        <div class="nd-premises">${km('\\Gamma,\\, i : \\mathbb{I} \\vdash t : A')}</div>
+        <hr class="nd-line">
+        <div class="nd-conclusion">${kd('\\Gamma \\vdash \\langle i \\rangle\\, t : \\mathrm{Path}_A\\, t(i_0)\\, t(i_1)')}</div>
       </div>
     `,
     description: `A path is a function from the interval 𝕀 to a type A. The interval has two endpoints: ${km('i_0')} (zero) and ${km('i_1')} (one).`,

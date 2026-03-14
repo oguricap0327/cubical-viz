@@ -151,4 +151,9 @@
     background: rgba(0, 0, 0, 0.75);
     border-top: 1px solid #4a4a6a;
   }
+
+  :global(.nd-rule) { text-align: center; padding: 4px 0; }
+  :global(.nd-premises) { font-size: 0.9rem; margin-bottom: 4px; }
+  :global(.nd-line) { border: none; border-top: 1.5px solid #88ccff; margin: 4px 60px; }
+  :global(.nd-conclusion) { font-size: 0.95rem; }
 </style>
