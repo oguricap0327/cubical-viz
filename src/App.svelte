@@ -13,7 +13,16 @@
   const validIds = new Set<string>(Object.keys(VISUALIZATIONS));
 
   function parseHash(): VisualizationType | null {
-    const id = window.location.hash.replace(/^#/, '');
+    const raw = window.location.hash.replace(/^#/, '');
+    // Alias map for short slugs
+    const aliases: Record<string, VisualizationType> = {
+      'kan-filling': 'kan-filling-rule',
+      'path-type': 'path-type-rule',
+      'composition': 'composition-rule',
+      'transport': 'transport-rule',
+      'glue-types': 'glue-type-rule',
+    };
+    const id = aliases[raw] ?? raw;
     return validIds.has(id) ? (id as VisualizationType) : null;
   }
 
