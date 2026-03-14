@@ -10,6 +10,8 @@
   import GlueTypeRule from './lib/rules/GlueTypeRule.svelte';
   import PathConcatRule from './lib/rules/PathConcatRule.svelte';
   import PathInvRule from './lib/rules/PathInvRule.svelte';
+  import SquareRule from './lib/rules/SquareRule.svelte';
+  import CubeRule from './lib/rules/CubeRule.svelte';
   import { type VisualizationType, VISUALIZATIONS } from './lib/types';
 
   const validIds = new Set<string>(Object.keys(VISUALIZATIONS));
@@ -68,6 +70,8 @@
 
   let isRuleBased = $derived(
     current === 'interval' ||
+    current === 'square' ||
+    current === 'cube' ||
     current === 'path-type-rule' ||
     current === 'composition-rule' ||
     current === 'transport-rule' ||
@@ -88,6 +92,10 @@
       {#key current}
         {#if current === 'interval'}
           <IntervalRule />
+        {:else if current === 'square'}
+          <SquareRule />
+        {:else if current === 'cube'}
+          <CubeRule />
         {:else if current === 'path-type-rule'}
           <PathTypeRule />
         {:else if current === 'composition-rule'}
