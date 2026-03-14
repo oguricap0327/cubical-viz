@@ -26,10 +26,10 @@
     
     setup: (scene: THREE.Scene, camera: THREE.Camera) => {
       const group = new THREE.Group();
-      
-      const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+
+      // Left object: sphere (blue, TYPE_FAMILY)
       const sphereA = new THREE.Mesh(
-        sphereGeometry,
+        new THREE.SphereGeometry(0.5, 32, 32),
         new THREE.MeshBasicMaterial({
           color: TYPE_FAMILY,
           transparent: true,
@@ -40,9 +40,9 @@
       sphereA.position.x = -2;
       group.add(sphereA);
 
-      const torusGeometry = new THREE.TorusGeometry(0.5, 0.2, 16, 32);
+      // Right object: torus (pink/orange, RESULT)
       const torusB = new THREE.Mesh(
-        torusGeometry,
+        new THREE.TorusGeometry(0.5, 0.2, 16, 32),
         new THREE.MeshBasicMaterial({
           color: RESULT,
           transparent: true,
@@ -53,85 +53,129 @@
       torusB.position.x = 2;
       group.add(torusB);
 
-      const pathCurve = new THREE.CatmullRomCurve3([
+      const arcMat = new THREE.MeshBasicMaterial({
+        color: EQUIVALENCE,
+        transparent: true,
+        opacity: 0.6
+      });
+
+      // Top arc: f: T→A (left→right), upward curve
+      const topCurve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(-2, 0, 0),
-        new THREE.Vector3(-1, 0.5, 0),
-        new THREE.Vector3(0, 0.8, 0),
-        new THREE.Vector3(1, 0.5, 0),
+        new THREE.Vector3(-1, 0.7, 0),
+        new THREE.Vector3(0, 1.0, 0),
+        new THREE.Vector3(1, 0.7, 0),
         new THREE.Vector3(2, 0, 0)
       ]);
-
-      const pathGeometry = new THREE.TubeGeometry(pathCurve, 64, 0.05, 8, false);
-      const pathMesh = new THREE.Mesh(
-        pathGeometry,
-        new THREE.MeshBasicMaterial({
-          color: EQUIVALENCE,
-          transparent: true,
-          opacity: 0.6
-        })
+      const topArc = new THREE.Mesh(
+        new THREE.TubeGeometry(topCurve, 64, 0.04, 8, false),
+        arcMat
       );
-      group.add(pathMesh);
+      group.add(topArc);
 
-      const elementGeometry = new THREE.SphereGeometry(0.15, 16, 16);
-      const element = new THREE.Mesh(
-        elementGeometry,
+      // Bottom arc: g: A→T (right→left), downward curve
+      const bottomCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(2, 0, 0),
+        new THREE.Vector3(1, -0.7, 0),
+        new THREE.Vector3(0, -1.0, 0),
+        new THREE.Vector3(-1, -0.7, 0),
+        new THREE.Vector3(-2, 0, 0)
+      ]);
+      const bottomArc = new THREE.Mesh(
+        new THREE.TubeGeometry(bottomCurve, 64, 0.04, 8, false),
+        arcMat
+      );
+      group.add(bottomArc);
+
+      // Arrowheads (small cones at each arc endpoint)
+      const arrowGeo = new THREE.ConeGeometry(0.08, 0.25, 12);
+      const arrowMat = new THREE.MeshBasicMaterial({ color: EQUIVALENCE });
+
+      // Top arc arrowhead (pointing right at x=2)
+      const topArrow = new THREE.Mesh(arrowGeo, arrowMat);
+      topArrow.position.copy(topCurve.getPoint(1));
+      topArrow.rotation.z = -Math.PI / 2; // point right
+      group.add(topArrow);
+
+      // Bottom arc arrowhead (pointing left at x=-2)
+      const bottomArrow = new THREE.Mesh(arrowGeo, arrowMat);
+      bottomArrow.position.copy(bottomCurve.getPoint(1));
+      bottomArrow.rotation.z = Math.PI / 2; // point left
+      group.add(bottomArrow);
+
+      // Moving dot (round-trip: top arc left→right, bottom arc right→left)
+      const dot = new THREE.Mesh(
+        new THREE.SphereGeometry(0.12, 16, 16),
         new THREE.MeshBasicMaterial({ color: BASE_POINT })
       );
-      group.add(element);
+      group.add(dot);
 
+      // Labels
       const labelA = createTextSprite('A', hexCss(TYPE_FAMILY));
-      labelA.position.set(-2, -1, 0);
+      labelA.position.set(-2, -1.5, 0);
       group.add(labelA);
 
       const labelB = createTextSprite('B', hexCss(RESULT));
-      labelB.position.set(2, -1, 0);
+      labelB.position.set(2, -1.5, 0);
       group.add(labelB);
 
-      const labelEquiv = createTextSprite('A ≃ B', hexCss(EQUIVALENCE));
-      labelEquiv.position.set(0, 1.2, 0);
-      group.add(labelEquiv);
+      const labelF = createTextSprite('f', hexCss(EQUIVALENCE));
+      labelF.position.set(0, 1.4, 0);
+      group.add(labelF);
+
+      const labelG = createTextSprite('g', hexCss(EQUIVALENCE));
+      labelG.position.set(0, -1.4, 0);
+      group.add(labelG);
 
       const axes = createAxes(scene);
-
       scene.add(group);
 
       (scene as any)._glueGroup = group;
       (scene as any)._axes = axes;
-      (scene as any)._glueElement = element;
-      (scene as any)._gluePathCurve = pathCurve;
+      (scene as any)._glueDot = dot;
+      (scene as any)._glueTopCurve = topCurve;
+      (scene as any)._glueBottomCurve = bottomCurve;
       (scene as any)._glueSphereA = sphereA;
       (scene as any)._glueTorusB = torusB;
 
       glueTypeRule.termMappings = [
         { termKey: 'A', objects: [sphereA] },
         { termKey: 'B', objects: [torusB] },
-        { termKey: 'e', objects: [pathMesh] },
-        { termKey: 'glue', objects: [element] },
+        { termKey: 'e', objects: [topArc, bottomArc] },
+        { termKey: 'glue', objects: [dot] },
       ];
     },
-    
+
     update: (time: number) => {
       const scene = (window as any)._currentScene;
       if (!scene) return;
 
-      const element = (scene as any)._glueElement as THREE.Mesh | undefined;
-      const pathCurve = (scene as any)._gluePathCurve as THREE.CatmullRomCurve3 | undefined;
+      const dot = (scene as any)._glueDot as THREE.Mesh | undefined;
+      const topCurve = (scene as any)._glueTopCurve as THREE.CatmullRomCurve3 | undefined;
+      const bottomCurve = (scene as any)._glueBottomCurve as THREE.CatmullRomCurve3 | undefined;
       const sphereA = (scene as any)._glueSphereA as THREE.Mesh | undefined;
       const torusB = (scene as any)._glueTorusB as THREE.Mesh | undefined;
 
-      if (!element || !pathCurve) return;
+      if (!dot || !topCurve || !bottomCurve) return;
 
-      const t = (Math.sin(time * 0.5) + 1) / 2;
-      const point = pathCurve.getPoint(t);
-      element.position.copy(point);
+      // Full round-trip: 0→1 top arc (left→right), 1→2 bottom arc (right→left)
+      const period = 6; // seconds for full loop
+      const loopT = (time % period) / period; // 0..1 over full cycle
+      let point: THREE.Vector3;
+      if (loopT < 0.5) {
+        // First half: travel along top arc left→right
+        point = topCurve.getPoint(loopT * 2);
+      } else {
+        // Second half: travel along bottom arc right→left
+        point = bottomCurve.getPoint((loopT - 0.5) * 2);
+      }
+      dot.position.copy(point);
 
-      const scale = 1 + Math.sin(t * Math.PI) * 0.3;
-      element.scale.set(scale, scale, scale);
-
-      if (sphereA) sphereA.rotation.y = t * Math.PI * 2;
-      if (torusB) torusB.rotation.y = t * Math.PI * 2;
+      // Gentle rotation on both objects
+      if (sphereA) sphereA.rotation.y = time * 0.3;
+      if (torusB) torusB.rotation.y = time * 0.3;
     },
-    
+
     cleanup: (scene: THREE.Scene) => {
       const group = (scene as any)._glueGroup;
       if (group) scene.remove(group);
