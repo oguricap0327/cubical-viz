@@ -8,6 +8,8 @@
   import TransportRule from './lib/rules/TransportRule.svelte';
   import KanFillingRule from './lib/rules/KanFillingRule.svelte';
   import GlueTypeRule from './lib/rules/GlueTypeRule.svelte';
+  import PathConcatRule from './lib/rules/PathConcatRule.svelte';
+  import PathInvRule from './lib/rules/PathInvRule.svelte';
   import { type VisualizationType, VISUALIZATIONS } from './lib/types';
 
   const validIds = new Set<string>(Object.keys(VISUALIZATIONS));
@@ -70,7 +72,9 @@
     current === 'composition-rule' ||
     current === 'transport-rule' ||
     current === 'kan-filling-rule' ||
-    current === 'glue-type-rule'
+    current === 'glue-type-rule' ||
+    current === 'path-concat-rule' ||
+    current === 'path-inv-rule'
   );
 </script>
 
@@ -94,6 +98,10 @@
           <KanFillingRule />
         {:else if current === 'glue-type-rule'}
           <GlueTypeRule />
+        {:else if current === 'path-concat-rule'}
+          <PathConcatRule />
+        {:else if current === 'path-inv-rule'}
+          <PathInvRule />
         {/if}
       {/key}
     {:else}

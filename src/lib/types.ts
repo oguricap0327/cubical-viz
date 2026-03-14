@@ -9,7 +9,9 @@ export type VisualizationType =
   | 'composition-rule'
   | 'transport-rule'
   | 'kan-filling-rule'
-  | 'glue-type-rule';
+  | 'glue-type-rule'
+  | 'path-concat-rule'
+  | 'path-inv-rule';
 
 export interface VisualizationInfo {
   label: string;
@@ -78,6 +80,16 @@ export const VISUALIZATIONS: Record<VisualizationType, VisualizationInfo> = {
     icon: '≃',
     description: 'Glue types and univalence - equivalent types are equal',
   },
+  'path-concat-rule': {
+    label: 'Path Concatenation',
+    icon: '∙',
+    description: 'Path concatenation - joining two paths end-to-end',
+  },
+  'path-inv-rule': {
+    label: 'Path Inversion',
+    icon: '⁻¹',
+    description: 'Path inversion - reversing the direction of a path',
+  },
 };
 
 export const NAV_CATEGORIES: NavCategory[] = [
@@ -91,6 +103,6 @@ export const NAV_CATEGORIES: NavCategory[] = [
   },
   {
     title: 'Typing Rules',
-    items: ['path-type-rule', 'composition-rule', 'transport-rule', 'kan-filling-rule', 'glue-type-rule'],
+    items: ['path-type-rule', 'composition-rule', 'transport-rule', 'kan-filling-rule', 'glue-type-rule', 'path-concat-rule', 'path-inv-rule'],
   },
 ];
