@@ -4,6 +4,8 @@
   import PathTypeRule from './lib/rules/PathTypeRule.svelte';
   import CompositionRule from './lib/rules/CompositionRule.svelte';
   import TransportRule from './lib/rules/TransportRule.svelte';
+  import KanFillingRule from './lib/rules/KanFillingRule.svelte';
+  import GlueTypeRule from './lib/rules/GlueTypeRule.svelte';
   import { type VisualizationType, VISUALIZATIONS } from './lib/types';
 
   let current: VisualizationType = $state('interval');
@@ -12,7 +14,9 @@
   let isRuleBased = $derived(
     current === 'path-type-rule' || 
     current === 'composition-rule' || 
-    current === 'transport-rule'
+    current === 'transport-rule' ||
+    current === 'kan-filling-rule' ||
+    current === 'glue-type-rule'
   );
 </script>
 
@@ -25,6 +29,10 @@
       <CompositionRule />
     {:else if current === 'transport-rule'}
       <TransportRule />
+    {:else if current === 'kan-filling-rule'}
+      <KanFillingRule />
+    {:else if current === 'glue-type-rule'}
+      <GlueTypeRule />
     {/if}
   {:else}
     <!-- Legacy geometric visualizations -->

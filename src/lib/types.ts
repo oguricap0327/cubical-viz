@@ -7,7 +7,9 @@ export type VisualizationType =
   | 'transport'
   | 'path-type-rule'
   | 'composition-rule'
-  | 'transport-rule';
+  | 'transport-rule'
+  | 'kan-filling-rule'
+  | 'glue-type-rule';
 
 export interface VisualizationInfo {
   label: string;
@@ -60,5 +62,15 @@ export const VISUALIZATIONS: Record<VisualizationType, VisualizationInfo> = {
     label: 'Transport Rule',
     icon: '⇝',
     description: 'Transport - coercion along paths in a type family',
+  },
+  'kan-filling-rule': {
+    label: 'Kan Filling',
+    icon: '▣',
+    description: 'Kan filling - constructing the missing lid of an open box',
+  },
+  'glue-type-rule': {
+    label: 'Glue Types',
+    icon: '≃',
+    description: 'Glue types and univalence - equivalent types are equal',
   },
 };
