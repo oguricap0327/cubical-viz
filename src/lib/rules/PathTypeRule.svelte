@@ -2,6 +2,7 @@
   import Rule from './Rule.svelte';
   import type { RuleDefinition } from './types';
   import { createInterval } from '../createInterval';
+  import { createAxes } from '../three/axes';
   import * as THREE from 'three';
   import katex from 'katex';
 
@@ -24,15 +25,18 @@
       const intervalGroup = createInterval();
       scene.add(intervalGroup);
       
-      // Store reference for cleanup
+      const axes = createAxes(scene);
+
+      // Store references for cleanup
       (scene as any)._intervalGroup = intervalGroup;
+      (scene as any)._axes = axes;
     },
     
     cleanup: (scene: THREE.Scene) => {
       const intervalGroup = (scene as any)._intervalGroup;
-      if (intervalGroup) {
-        scene.remove(intervalGroup);
-      }
+      if (intervalGroup) scene.remove(intervalGroup);
+      const axes = (scene as any)._axes;
+      if (axes) scene.remove(axes);
     }
   };
 </script>
