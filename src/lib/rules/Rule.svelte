@@ -26,6 +26,9 @@
     // Call rule-specific setup
     rule.setup(scene, camera);
 
+    // Expose scene for update callbacks
+    (window as any)._currentScene = scene;
+
     const clock = new THREE.Clock();
     let animationId: number;
 
@@ -54,6 +57,7 @@
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener('resize', onResize);
+      (window as any)._currentScene = null;
       
       if (rule.cleanup) {
         rule.cleanup(scene);
@@ -97,7 +101,7 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    width: 100vw;
+    width: 100%;
   }
 
   .rule-header {

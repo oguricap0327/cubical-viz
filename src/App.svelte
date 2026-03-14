@@ -10,10 +10,9 @@
 
   let current: VisualizationType = $state('interval');
 
-  // Determine if current visualization is a rule-based one
   let isRuleBased = $derived(
-    current === 'path-type-rule' || 
-    current === 'composition-rule' || 
+    current === 'path-type-rule' ||
+    current === 'composition-rule' ||
     current === 'transport-rule' ||
     current === 'kan-filling-rule' ||
     current === 'glue-type-rule'
@@ -21,29 +20,35 @@
 </script>
 
 <main>
-  {#if isRuleBased}
-    <!-- Rule-based visualization with its own layout -->
-    {#if current === 'path-type-rule'}
-      <PathTypeRule />
-    {:else if current === 'composition-rule'}
-      <CompositionRule />
-    {:else if current === 'transport-rule'}
-      <TransportRule />
-    {:else if current === 'kan-filling-rule'}
-      <KanFillingRule />
-    {:else if current === 'glue-type-rule'}
-      <GlueTypeRule />
-    {/if}
-  {:else}
-    <!-- Legacy geometric visualizations -->
-    <div class="header">
-      <h1>Cubical Type Theory Visualizer</h1>
-      <p>{VISUALIZATIONS[current].description}</p>
-    </div>
+  <!-- Always-visible categorized sidebar -->
+  <Controls selected={current} onSelect={(v) => (current = v)} />
 
-    <Controls selected={current} onSelect={(v) => (current = v)} />
-    <Scene visualization={current} />
-  {/if}
+  <!-- Content area, offset by sidebar width -->
+  <div class="content">
+    {#if isRuleBased}
+      {#key current}
+        {#if current === 'path-type-rule'}
+          <PathTypeRule />
+        {:else if current === 'composition-rule'}
+          <CompositionRule />
+        {:else if current === 'transport-rule'}
+          <TransportRule />
+        {:else if current === 'kan-filling-rule'}
+          <KanFillingRule />
+        {:else if current === 'glue-type-rule'}
+          <GlueTypeRule />
+        {/if}
+      {/key}
+    {:else}
+      <div class="geo-header">
+        <h1>Cubical Type Theory Visualizer</h1>
+        <p>{VISUALIZATIONS[current].description}</p>
+      </div>
+      {#key current}
+        <Scene visualization={current} />
+      {/key}
+    {/if}
+  </div>
 </main>
 
 <style>
@@ -52,9 +57,18 @@
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    display: flex;
   }
 
-  .header {
+  .content {
+    flex: 1;
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    margin-left: 204px; /* sidebar width + border */
+  }
+
+  .geo-header {
     position: absolute;
     top: 20px;
     left: 20px;
@@ -62,16 +76,17 @@
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
     max-width: 500px;
+    pointer-events: none;
   }
 
   h1 {
     margin: 0;
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   p {
     margin: 0.5rem 0 0 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     opacity: 0.9;
   }
 </style>

@@ -17,6 +17,11 @@ export interface VisualizationInfo {
   description: string;
 }
 
+export interface NavCategory {
+  title: string;
+  items: VisualizationType[];
+}
+
 export const VISUALIZATIONS: Record<VisualizationType, VisualizationInfo> = {
   interval: {
     label: 'Interval',
@@ -74,3 +79,18 @@ export const VISUALIZATIONS: Record<VisualizationType, VisualizationInfo> = {
     description: 'Glue types and univalence - equivalent types are equal',
   },
 };
+
+export const NAV_CATEGORIES: NavCategory[] = [
+  {
+    title: 'Primitives',
+    items: ['interval', 'path', 'square', 'cube'],
+  },
+  {
+    title: 'Operations',
+    items: ['composition', 'transport'],
+  },
+  {
+    title: 'Typing Rules',
+    items: ['path-type-rule', 'composition-rule', 'transport-rule', 'kan-filling-rule', 'glue-type-rule'],
+  },
+];
