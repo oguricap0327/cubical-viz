@@ -12,7 +12,8 @@ export type VisualizationType =
   | 'glue-type-rule'
   | 'path-concat-rule'
   | 'path-inv-rule'
-  | 'face-lattice';
+  | 'face-lattice'
+  | 'univalence';
 
 export interface VisualizationInfo {
   label: string;
@@ -96,6 +97,11 @@ export const VISUALIZATIONS: Record<VisualizationType, VisualizationInfo> = {
     icon: '⊓',
     description: 'The face lattice 𝔽 governing partial elements',
   },
+  univalence: {
+    label: 'Univalence',
+    icon: '≃',
+    description: 'The univalence theorem proved via Glue types',
+  },
 };
 
 export const NAV_CATEGORIES: NavCategory[] = [
@@ -109,7 +115,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
   },
   {
     title: 'Theory',
-    items: ['face-lattice'],
+    items: ['face-lattice', 'univalence'],
   },
   {
     title: 'Typing Rules',

@@ -11,7 +11,7 @@
   import AxisGizmo from '../three/AxisGizmo.svelte';
   import type { Snippet } from 'svelte';
 
-  let { rule, controls }: { rule: RuleDefinition; controls?: Snippet } = $props();
+  let { rule, controls, onStep: onStepProp }: { rule: RuleDefinition; controls?: Snippet; onStep?: (index: number) => void } = $props();
 
   let activeStep = $state(0);
 
@@ -248,7 +248,7 @@
   </div>
 
   {#if rule.steps}
-    <StepPanel steps={rule.steps} bind:activeStep />
+    <StepPanel steps={rule.steps} bind:activeStep onStep={onStepProp} />
   {/if}
 
   <div class="visualization">

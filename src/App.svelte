@@ -13,6 +13,7 @@
   import SquareRule from './lib/rules/SquareRule.svelte';
   import CubeRule from './lib/rules/CubeRule.svelte';
   import FaceLattice from './lib/FaceLattice.svelte';
+  import Univalence from './lib/univalence/Univalence.svelte';
   import { type VisualizationType, VISUALIZATIONS } from './lib/types';
 
   const validIds = new Set<string>(Object.keys(VISUALIZATIONS));
@@ -82,7 +83,7 @@
     current === 'path-inv-rule'
   );
 
-  let isStandalone = $derived(current === 'face-lattice');
+  let isStandalone = $derived(current === 'face-lattice' || current === 'univalence');
 </script>
 
 <main>
@@ -95,6 +96,8 @@
       {#key current}
         {#if current === 'face-lattice'}
           <FaceLattice />
+        {:else if current === 'univalence'}
+          <Univalence />
         {/if}
       {/key}
     {:else if isRuleBased}
