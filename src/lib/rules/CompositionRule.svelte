@@ -3,6 +3,7 @@
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
   import { createTextSprite } from '../textSprite';
+  import { INTERVAL, BASE_POINT, PARTIAL_DATA, FILL_RESULT, hexCss } from '../colors';
   import katex from 'katex';
 
   const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
@@ -26,10 +27,10 @@
       
       const boxSize = 1.2;
       
-      // Base face (at i=0) - blue
+      // Base face (at i=0) - base point
       const baseGeometry = new THREE.PlaneGeometry(boxSize, boxSize);
       const baseMaterial = new THREE.MeshStandardMaterial({
-        color: 0x3366ff,
+        color: BASE_POINT,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.7,
@@ -39,10 +40,10 @@
       base.rotation.x = -Math.PI / 2;
       group.add(base);
       
-      // Partial side faces (extent φ) - green
+      // Partial side faces (extent φ) - partial data
       const sideGeometry = new THREE.PlaneGeometry(boxSize, boxSize);
       const sideMaterial = new THREE.MeshStandardMaterial({
-        color: 0x44cc88,
+        color: PARTIAL_DATA,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.6,
@@ -58,10 +59,10 @@
       rightSide.rotation.y = -Math.PI / 2;
       group.add(rightSide);
       
-      // Lid face (at i=1) - red, initially hidden
+      // Lid face (at i=1) - fill result, initially hidden
       const lidGeometry = new THREE.PlaneGeometry(boxSize, boxSize);
       const lidMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff4433,
+        color: FILL_RESULT,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0,
@@ -71,24 +72,24 @@
       lid.rotation.x = Math.PI / 2;
       group.add(lid);
       
-      // Wireframe edges
+      // Wireframe edges (interval)
       const edgesGeometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(boxSize, boxSize, boxSize));
-      const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x88ccff, linewidth: 2 });
+      const edgesMaterial = new THREE.LineBasicMaterial({ color: INTERVAL, linewidth: 2 });
       const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
       group.add(edges);
       
       // Labels
-      const baseLabel = createTextSprite('a₀ (base)', '#6699ff');
+      const baseLabel = createTextSprite('a₀ (base)', hexCss(BASE_POINT));
       baseLabel.position.set(0, -boxSize/2 - 0.3, 0);
       baseLabel.scale.set(0.3, 0.3, 0.3);
       group.add(baseLabel);
       
-      const sideLabel = createTextSprite('u (sides)', '#66ddaa');
+      const sideLabel = createTextSprite('u (sides)', hexCss(PARTIAL_DATA));
       sideLabel.position.set(-boxSize/2 - 0.4, 0, 0);
       sideLabel.scale.set(0.3, 0.3, 0.3);
       group.add(sideLabel);
       
-      const lidLabel = createTextSprite('comp (lid)', '#ff6655');
+      const lidLabel = createTextSprite('comp (lid)', hexCss(FILL_RESULT));
       lidLabel.position.set(0, boxSize/2 + 0.3, 0);
       lidLabel.scale.set(0.3, 0.3, 0.3);
       group.add(lidLabel);

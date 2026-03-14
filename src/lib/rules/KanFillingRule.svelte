@@ -2,6 +2,7 @@
   import Rule from './Rule.svelte';
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
+  import { BASE_POINT, PARTIAL_DATA, FILL_RESULT } from '../colors';
   import katex from 'katex';
 
   const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
@@ -25,11 +26,11 @@
       
       const boxSize = 2;
 
-      // Bottom face (i=0) - blue
+      // Bottom face (i=0) - base point
       const bottom = new THREE.Mesh(
         new THREE.PlaneGeometry(boxSize, boxSize),
         new THREE.MeshBasicMaterial({
-          color: 0x4488ff,
+          color: BASE_POINT,
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 0.7
@@ -39,13 +40,13 @@
       bottom.rotation.x = -Math.PI / 2;
       group.add(bottom);
 
-      // Four side faces - green
+      // Four side faces - partial data
       const sides: THREE.Mesh[] = [];
 
       const front = new THREE.Mesh(
         new THREE.PlaneGeometry(boxSize, boxSize),
         new THREE.MeshBasicMaterial({
-          color: 0x44ff88,
+          color: PARTIAL_DATA,
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 0.7
@@ -58,7 +59,7 @@
       const back = new THREE.Mesh(
         new THREE.PlaneGeometry(boxSize, boxSize),
         new THREE.MeshBasicMaterial({
-          color: 0x44ff88,
+          color: PARTIAL_DATA,
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 0.7
@@ -72,7 +73,7 @@
       const left = new THREE.Mesh(
         new THREE.PlaneGeometry(boxSize, boxSize),
         new THREE.MeshBasicMaterial({
-          color: 0x44ff88,
+          color: PARTIAL_DATA,
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 0.7
@@ -86,7 +87,7 @@
       const right = new THREE.Mesh(
         new THREE.PlaneGeometry(boxSize, boxSize),
         new THREE.MeshBasicMaterial({
-          color: 0x44ff88,
+          color: PARTIAL_DATA,
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 0.7
@@ -97,12 +98,12 @@
       group.add(right);
       sides.push(right);
 
-      // Top face (lid)
+      // Top face (lid) - fill result
       const topGeometry = new THREE.PlaneGeometry(boxSize, boxSize, 20, 20);
       const top = new THREE.Mesh(
         topGeometry,
         new THREE.MeshBasicMaterial({
-          color: 0xff4488,
+          color: FILL_RESULT,
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 0.7

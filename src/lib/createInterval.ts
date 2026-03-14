@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { INTERVAL, TYPE_FAMILY, hexCss } from './colors';
 
 /**
  * Creates a text sprite using a canvas texture.
@@ -45,12 +46,14 @@ export function createInterval(): THREE.Group {
   const group = new THREE.Group();
 
   // -- Interval line segment from i0=(0,0,0) to i1=(1,0,0) --
-  // Use a vertex-colored line to show the gradient from blue → red
+  // Vertex-colored gradient: INTERVAL (cyan) at i₀ → TYPE_FAMILY (blue) at i₁
   const lineGeometry = new THREE.BufferGeometry();
   const positions = new Float32Array([0, 0, 0, 1, 0, 0]);
+  const intervalColor = new THREE.Color(INTERVAL);
+  const familyColor = new THREE.Color(TYPE_FAMILY);
   const colors = new Float32Array([
-    0.2, 0.4, 1.0, // blue  at i0
-    1.0, 0.3, 0.2, // red   at i1
+    intervalColor.r, intervalColor.g, intervalColor.b,
+    familyColor.r,   familyColor.g,   familyColor.b,
   ]);
   lineGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   lineGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
@@ -65,10 +68,10 @@ export function createInterval(): THREE.Group {
   // -- Endpoint spheres --
   const sphereGeometry = new THREE.SphereGeometry(0.06, 32, 32);
 
-  // i0 endpoint (blue) at origin
+  // i0 endpoint (INTERVAL cyan) at origin
   const i0Material = new THREE.MeshStandardMaterial({
-    color: 0x3366ff,
-    emissive: 0x1133aa,
+    color: INTERVAL,
+    emissive: 0x226688,
     roughness: 0.3,
     metalness: 0.6,
   });
@@ -76,10 +79,10 @@ export function createInterval(): THREE.Group {
   i0Sphere.position.set(0, 0, 0);
   group.add(i0Sphere);
 
-  // i1 endpoint (red) at (1,0,0)
+  // i1 endpoint (TYPE_FAMILY blue) at (1,0,0)
   const i1Material = new THREE.MeshStandardMaterial({
-    color: 0xff4433,
-    emissive: 0xaa1100,
+    color: TYPE_FAMILY,
+    emissive: 0x224488,
     roughness: 0.3,
     metalness: 0.6,
   });
@@ -88,11 +91,11 @@ export function createInterval(): THREE.Group {
   group.add(i1Sphere);
 
   // -- Text labels --
-  const i0Label = createTextSprite('i0', '#6699ff');
+  const i0Label = createTextSprite('i0', hexCss(INTERVAL));
   i0Label.position.set(0, -0.2, 0);
   group.add(i0Label);
 
-  const i1Label = createTextSprite('i1', '#ff6655');
+  const i1Label = createTextSprite('i1', hexCss(TYPE_FAMILY));
   i1Label.position.set(1, -0.2, 0);
   group.add(i1Label);
 

@@ -3,6 +3,7 @@
   import type { RuleDefinition } from './types';
   import * as THREE from 'three';
   import { createTextSprite } from '../textSprite';
+  import { TYPE_FAMILY, RESULT, EQUIVALENCE, BASE_POINT, hexCss } from '../colors';
   import katex from 'katex';
 
   const km = (f: string) => katex.renderToString(f, { throwOnError: false, displayMode: false });
@@ -29,7 +30,7 @@
       const sphereA = new THREE.Mesh(
         sphereGeometry,
         new THREE.MeshBasicMaterial({
-          color: 0x4488ff,
+          color: TYPE_FAMILY,
           transparent: true,
           opacity: 0.8,
           wireframe: true
@@ -42,7 +43,7 @@
       const torusB = new THREE.Mesh(
         torusGeometry,
         new THREE.MeshBasicMaterial({
-          color: 0xff4488,
+          color: RESULT,
           transparent: true,
           opacity: 0.8,
           wireframe: true
@@ -63,7 +64,7 @@
       const pathMesh = new THREE.Mesh(
         pathGeometry,
         new THREE.MeshBasicMaterial({
-          color: 0xffaa44,
+          color: EQUIVALENCE,
           transparent: true,
           opacity: 0.6
         })
@@ -73,19 +74,19 @@
       const elementGeometry = new THREE.SphereGeometry(0.15, 16, 16);
       const element = new THREE.Mesh(
         elementGeometry,
-        new THREE.MeshBasicMaterial({ color: 0x44ff88 })
+        new THREE.MeshBasicMaterial({ color: BASE_POINT })
       );
       group.add(element);
 
-      const labelA = createTextSprite('A', 0.5);
+      const labelA = createTextSprite('A', hexCss(TYPE_FAMILY));
       labelA.position.set(-2, -1, 0);
       group.add(labelA);
 
-      const labelB = createTextSprite('B', 0.5);
+      const labelB = createTextSprite('B', hexCss(RESULT));
       labelB.position.set(2, -1, 0);
       group.add(labelB);
 
-      const labelEquiv = createTextSprite('A ≃ B', 0.5);
+      const labelEquiv = createTextSprite('A ≃ B', hexCss(EQUIVALENCE));
       labelEquiv.position.set(0, 1.2, 0);
       group.add(labelEquiv);
 
